@@ -1,0 +1,5 @@
+@extends('layouts.app')
+@section('content')
+<div class="card"><div class="top"><div><div class="muted">SHIPMENT DETAIL</div><h2>{{ $shipment->shipment_number }}</h2><span class="badge">{{ $shipment->status }}</span></div><div><a class="btn secondary" href="{{ route('tracking.index',$shipment) }}">Tracking Timeline</a> <a class="btn" href="{{ route('shipments.edit',$shipment) }}">Edit Status</a></div></div>
+<div class="grid"><div><h4>Shipment Information</h4><p><b>Customer:</b> {{ $shipment->customer->name ?? '-' }}</p><p><b>Carrier:</b> {{ $shipment->carrier->name ?? '-' }}</p><p><b>Cargo:</b> {{ $shipment->cargo_type }} ({{ $shipment->weight_kg }} kg)</p></div><div><h4>Route</h4><p><b>Origin:</b> {{ $shipment->origin->city ?? '-' }}</p><p><b>Destination:</b> {{ $shipment->destination->city ?? '-' }}</p><p><b>Expected Arrival:</b> {{ $shipment->expected_arrival?->format('d M Y H:i') }}</p><p><b>Estimated Arrival:</b> {{ $shipment->estimated_arrival?->format('d M Y H:i') ?? '-' }}</p></div></div></div>
+@endsection
