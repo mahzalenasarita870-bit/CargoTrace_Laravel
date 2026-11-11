@@ -51,4 +51,58 @@ class ReportsController extends Controller
             'delayed'
         ));
     }
+
+    public function exportPdf(Request $request)
+{
+    $query = Shipment::query();
+
+    if ($request->filled('status')) {
+        $query->where('current_status', $request->status);
+    }
+
+    if ($request->filled('start_date')) {
+        $query->whereDate('created_at', '>=', $request->start_date);
+    }
+
+    if ($request->filled('end_date')) {
+        $query->whereDate('created_at', '<=', $request->end_date);
+    }
+
+    $shipments = $query->latest()->get();
+
+    $totalShipments = $shipments->count();
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+        'reports.pdf',
+        compact('shipments', 'totalShipments')
+    );
+
+    return $pdf->download('laporan-cargotrace.pdf');
+}
+
+
+public function exportExcel(Request $request)
+{
+    $query = Shipment::query();
+
+    if ($request->filled('status')) {
+        $query->where('current_status', $request->status);
+    }
+
+    if ($request->filled('start_date')) {
+        $query->whereDate('created_at', '>=', $request->start_date);
+    }
+
+    if ($request->filled('end_date')) {
+        $query->whereDate('created_at', '<=', $request->end_date);
+    }
+
+    $shipments = $query->latest()->get();
+
+    return \Maatwebsite\Excel\Facades\Excel::download(
+        new \App\Exports\ShipmentsExport($shipments),
+        'laporan-cargotrace.xlsx'
+    );
+}
+
 }

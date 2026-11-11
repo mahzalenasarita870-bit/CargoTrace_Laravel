@@ -150,12 +150,39 @@
 
     <div class="header">
         <div>
-            <h1>📊 Shipment Reports</h1>
-            <p class="subtitle">
-                Laporan dan rekapitulasi pengiriman CargoTrace.
-            </p>
-        </div>
+
+
+<div class="header">
+    <div>
+        <h1>📊 Shipment Reports</h1>
+        <p class="subtitle">
+            Laporan dan rekapitulasi pengiriman CargoTrace.
+        </p>
     </div>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="{{ route('reports.exportPdf', request()->query()) }}"
+           style="display: inline-block;
+                  padding: 10px 20px;
+                  background: #dc2626;
+                  color: white;
+                  text-decoration: none;
+                  border-radius: 7px;">
+            📄 Export PDF
+        </a>
+
+        <a href="{{ route('reports.exportExcel', request()->query()) }}"
+           style="display: inline-block;
+                  padding: 10px 20px;
+                  background: #16a34a;
+                  color: white;
+                  text-decoration: none;
+                  border-radius: 7px;">
+            📊 Export Excel
+        </a>
+    </div>
+</div>
+
 
     <div class="cards">
 
@@ -202,7 +229,7 @@
                     'DELAYED'
                 ] as $status)
                     <option value="{{ $status }}"
-                        {{ request('status') == $status ? 'selected' : '' }}>
+                        {{ request('status') == $status ? 'selected' : '' }}
                         {{ $status }}
                     </option>
                 @endforeach

@@ -83,12 +83,40 @@
             + Tambah Tracking
         </a>
     </div>
+    <form action="{{ route('tracking.search') }}" method="GET"
+      style="display:flex; gap:10px; margin-bottom:20px;">
+
+    <input
+        type="text"
+        name="shipment_number"
+        placeholder="Masukkan nomor shipment..."
+        required
+        style="padding:12px; border:1px solid #cbd5e1;
+               border-radius:8px; flex:1;"
+    >
+
+    <button type="submit"
+        style="background:#2563eb; color:white;
+               padding:12px 18px; border:none;
+               border-radius:8px; cursor:pointer;">
+        Cari Shipment
+    </button>
+
+</form>
 
     @if(session('success'))
         <div class="success">
             {{ session('success') }}
         </div>
     @endif
+
+    @if(session('error'))
+    <div style="background:#fee2e2; color:#b91c1c;
+                padding:12px; border-radius:8px;
+                margin-bottom:20px;">
+        {{ session('error') }}
+    </div>
+@endif
 
     <table>
         <thead>

@@ -53,4 +53,44 @@ class TrackingController extends Controller
             ->route('tracking.index')
             ->with('success', 'Tracking event berhasil ditambahkan.');
     }
+
+    public function history(Shipment $shipment)
+{
+    $trackingEvents = TrackingEvent::with([
+        'shipment',
+        'location',
+        'creator'
+    ])
+    ->where('shipment_id', $shipment->id)
+    ->orderBy('event_time', 'asc')
+    ->get();
+
+    return view('tracking.history', compact(
+        'shipment',
+        'trackingEvents'
+    ));
+}
+
+    public function search(Request $request)
+{
+    $request->validate([
+        'shipment_number' => 'required|string',
+    ]);
+
+    $shipment = Shipment::where(
+        'shipment_number',
+        $request->shipment_number
+    )->first();
+
+    if (!$shipment) {
+        return redirect()
+            ->route('tracking.index')
+            ->with('error', 'Shipment tidak ditemukan.');
+    }
+
+    return redirect()->route(
+        'tracking.history',
+        $shipment->id
+    );
+}
 }

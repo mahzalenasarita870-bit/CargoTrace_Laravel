@@ -47,4 +47,9 @@ class Shipment extends Model
     {
         return $this->belongsTo(Location::class, 'destination_location_id');
     }
+
+     public function trackings()
+    {
+        return $this->hasMany(Tracking::class);
+    }
 }

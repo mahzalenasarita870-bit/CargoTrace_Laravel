@@ -1,32 +1,35 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Shipment - CargoTrace</title>
+    <title>Add Shipment - CargoTrace</title>
 
     <style>
-        body {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: Arial, sans-serif;
+        }
+
+        body {
             background: #f1f5f9;
             padding: 30px;
-            color: #1e293b;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: auto;
             background: white;
             padding: 30px;
-            border-radius: 12px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
         }
 
-        h1 {
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: #64748b;
+        h2 {
+            color: #1e293b;
             margin-bottom: 25px;
         }
 
@@ -37,68 +40,89 @@
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         label {
             display: block;
-            font-weight: bold;
             margin-bottom: 8px;
+            color: #334155;
+            font-size: 14px;
+            font-weight: bold;
         }
 
         input, select {
             width: 100%;
-            padding: 12px;
+            padding: 11px;
             border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            box-sizing: border-box;
+            border-radius: 5px;
+            font-size: 14px;
+            background: white;
         }
 
-        .btn {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 13px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .back {
-            color: #2563eb;
-            text-decoration: none;
-            margin-left: 15px;
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2563eb;
         }
 
         .error {
-            background: #fee2e2;
-            color: #b91c1c;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 5px;
         }
 
-        @media(max-width: 600px) {
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 11px 18px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-save {
+            background: #2563eb;
+        }
+
+        .btn-back {
+            background: #475569;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
             .form-grid {
                 grid-template-columns: 1fr;
+                gap: 0;
             }
         }
     </style>
 </head>
+
 <body>
 
 <div class="container">
 
-    <h1>📦 Tambah Shipment</h1>
+    <h2>Add New Shipment</h2>
 
-    <p class="subtitle">
-        Masukkan informasi pengiriman barang.
-    </p>
-
-    @if($errors->any())
-        <div class="error">
-            <strong>Periksa kembali data:</strong>
-            <ul>
-                @foreach($errors->all() as $error)
+    @if ($errors->any())
+        <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:5px;margin-bottom:20px;">
+            <strong>Periksa kembali data yang dimasukkan:</strong>
+            <ul style="margin-left:20px;margin-top:8px;">
+                @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
@@ -112,21 +136,19 @@
 
             <div class="form-group">
                 <label>Shipment Number</label>
-                <input
-                    type="text"
-                    name="shipment_number"
-                    value="{{ old('shipment_number') }}"
-                    placeholder="CT-2026-001"
-                    required
-                >
+                <input type="text"
+                       name="shipment_number"
+                       value="{{ old('shipment_number') }}"
+                       placeholder="Contoh: CT-001"
+                       required>
             </div>
 
             <div class="form-group">
                 <label>Customer</label>
                 <select name="customer_id" required>
-                    <option value="">Pilih Customer</option>
+                    <option value="">-- Select Customer --</option>
 
-                    @foreach($customers as $customer)
+                    @foreach ($customers as $customer)
                         <option value="{{ $customer->id }}"
                             {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
                             {{ $customer->name }}
@@ -138,9 +160,9 @@
             <div class="form-group">
                 <label>Carrier</label>
                 <select name="carrier_id" required>
-                    <option value="">Pilih Carrier</option>
+                    <option value="">-- Select Carrier --</option>
 
-                    @foreach($carriers as $carrier)
+                    @foreach ($carriers as $carrier)
                         <option value="{{ $carrier->id }}"
                             {{ old('carrier_id') == $carrier->id ? 'selected' : '' }}>
                             {{ $carrier->name }}
@@ -150,22 +172,11 @@
             </div>
 
             <div class="form-group">
-                <label>Cargo Type</label>
-                <input
-                    type="text"
-                    name="cargo_type"
-                    value="{{ old('cargo_type') }}"
-                    placeholder="Contoh: Electronics"
-                    required
-                >
-            </div>
-
-            <div class="form-group">
-                <label>Origin</label>
+                <label>Origin Location</label>
                 <select name="origin_location_id" required>
-                    <option value="">Pilih lokasi asal</option>
+                    <option value="">-- Select Origin --</option>
 
-                    @foreach($locations as $location)
+                    @foreach ($locations as $location)
                         <option value="{{ $location->id }}"
                             {{ old('origin_location_id') == $location->id ? 'selected' : '' }}>
                             {{ $location->name }} - {{ $location->city }}
@@ -175,11 +186,11 @@
             </div>
 
             <div class="form-group">
-                <label>Destination</label>
+                <label>Destination Location</label>
                 <select name="destination_location_id" required>
-                    <option value="">Pilih lokasi tujuan</option>
+                    <option value="">-- Select Destination --</option>
 
-                    @foreach($locations as $location)
+                    @foreach ($locations as $location)
                         <option value="{{ $location->id }}"
                             {{ old('destination_location_id') == $location->id ? 'selected' : '' }}>
                             {{ $location->name }} - {{ $location->city }}
@@ -189,68 +200,84 @@
             </div>
 
             <div class="form-group">
+                <label>Cargo Type</label>
+                <input type="text"
+                       name="cargo_type"
+                       value="{{ old('cargo_type') }}"
+                       placeholder="Contoh: Electronics"
+                       required>
+            </div>
+
+            <div class="form-group">
                 <label>Weight (kg)</label>
-                <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    name="weight"
-                    value="{{ old('weight') }}"
-                    placeholder="Contoh: 250"
-                >
+                <input type="number"
+                       name="weight"
+                       step="0.01"
+                       min="0"
+                       value="{{ old('weight') }}"
+                       placeholder="Contoh: 25.50">
             </div>
 
             <div class="form-group">
                 <label>Volume (m³)</label>
-                <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    name="volume"
-                    value="{{ old('volume') }}"
-                    placeholder="Contoh: 12.5"
-                >
+                <input type="number"
+                       name="volume"
+                       step="0.01"
+                       min="0"
+                       value="{{ old('volume') }}"
+                       placeholder="Contoh: 2.50">
             </div>
 
             <div class="form-group">
                 <label>Expected Departure</label>
-                <input
-                    type="datetime-local"
-                    name="expected_departure"
-                    value="{{ old('expected_departure') }}"
-                >
+                <input type="datetime-local"
+                       name="expected_departure"
+                       value="{{ old('expected_departure') }}">
             </div>
 
             <div class="form-group">
                 <label>Expected Arrival</label>
-                <input
-                    type="datetime-local"
-                    name="expected_arrival"
-                    value="{{ old('expected_arrival') }}"
-                >
+                <input type="datetime-local"
+                       name="expected_arrival"
+                       value="{{ old('expected_arrival') }}">
             </div>
 
             <div class="form-group">
                 <label>Current Status</label>
-                <select name="current_status" required>
-                    @foreach(['CREATED', 'BOOKED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED'] as $status)
-                        <option value="{{ $status }}"
-                            {{ old('current_status', 'CREATED') == $status ? 'selected' : '' }}>
-                            {{ $status }}
-                        </option>
-                    @endforeach
+                <select name="current_status">
+                    <option value="CREATED"
+                        {{ old('current_status', 'CREATED') == 'CREATED' ? 'selected' : '' }}>
+                        CREATED
+                    </option>
+
+                    <option value="IN_TRANSIT"
+                        {{ old('current_status') == 'IN_TRANSIT' ? 'selected' : '' }}>
+                        IN TRANSIT
+                    </option>
+
+                    <option value="DELIVERED"
+                        {{ old('current_status') == 'DELIVERED' ? 'selected' : '' }}>
+                        DELIVERED
+                    </option>
+
+                    <option value="CANCELLED"
+                        {{ old('current_status') == 'CANCELLED' ? 'selected' : '' }}>
+                        CANCELLED
+                    </option>
                 </select>
             </div>
 
         </div>
 
-        <button type="submit" class="btn">
-            Simpan Shipment
-        </button>
+        <div class="buttons">
+            <button type="submit" class="btn btn-save">
+                Save Shipment
+            </button>
 
-        <a href="{{ route('shipments.index') }}" class="back">
-            Batal
-        </a>
+            <a href="{{ route('shipments.index') }}" class="btn btn-back">
+                Back
+            </a>
+        </div>
 
     </form>
 

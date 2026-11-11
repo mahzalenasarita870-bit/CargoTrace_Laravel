@@ -16,64 +16,64 @@
 
         body {
             background: #f1f5f9;
-            color: #1e293b;
             padding: 30px;
         }
 
         .container {
             max-width: 1400px;
             margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
         }
 
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-            gap: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .header h1 {
-            font-size: 28px;
-        }
-
-        .header p {
-            color: #64748b;
-            margin-top: 8px;
+        h2 {
+            color: #1e293b;
         }
 
         .btn {
             display: inline-block;
-            padding: 12px 18px;
-            background: #2563eb;
+            padding: 9px 14px;
+            border: none;
+            border-radius: 5px;
             color: white;
             text-decoration: none;
-            border-radius: 8px;
-            border: none;
+            font-size: 13px;
             cursor: pointer;
         }
 
-        .btn:hover {
-            background: #1d4ed8;
+        .btn-add {
+            background: #2563eb;
         }
 
-        .btn-back {
-            background: #64748b;
+        .btn-edit {
+            background: #f59e0b;
         }
 
-        .section {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.04);
+        .btn-delete {
+            background: #dc2626;
         }
 
-        .success {
+        .btn-dashboard {
+            background: #475569;
+        }
+
+        .alert {
             background: #dcfce7;
             color: #166534;
-            padding: 14px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
         }
 
         .table-wrapper {
@@ -83,28 +83,38 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1000px;
+            margin-top: 15px;
+            min-width: 1200px;
+        }
+
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
         }
 
         th {
-            background: #f8fafc;
-            text-align: left;
-            padding: 15px;
-            font-size: 13px;
+            background: #2563eb;
+            color: white;
         }
 
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 13px;
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .aksi {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
         }
 
         .status {
-            padding: 6px 10px;
+            display: inline-block;
+            padding: 5px 9px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: bold;
-            display: inline-block;
         }
 
         .created {
@@ -112,19 +122,9 @@
             color: #1d4ed8;
         }
 
-        .booked {
-            background: #ede9fe;
-            color: #6d28d9;
-        }
-
-        .picked_up {
+        .in-transit {
             background: #fef3c7;
             color: #92400e;
-        }
-
-        .in_transit {
-            background: #ffedd5;
-            color: #c2410c;
         }
 
         .delivered {
@@ -132,24 +132,22 @@
             color: #166534;
         }
 
-        .empty {
-            text-align: center;
-            padding: 35px;
-            color: #64748b;
+        .cancelled {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         .pagination {
             margin-top: 20px;
         }
 
-        @media(max-width: 600px) {
+        @media (max-width: 768px) {
             body {
-                padding: 15px;
+                padding: 10px;
             }
 
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
+            .container {
+                padding: 15px;
             }
         }
     </style>
@@ -160,120 +158,121 @@
 <div class="container">
 
     <div class="header">
-        <div>
-            <h1>📦 Shipment Management</h1>
-            <p>Kelola seluruh data pengiriman CargoTrace.</p>
-        </div>
+        <h2>Shipment Management</h2>
 
         <div>
-            <a href="{{ route('dashboard') }}" class="btn btn-back">
-                ← Dashboard
+            <a href="{{ route('shipments.create') }}" class="btn btn-add">
+                + Add Shipment
             </a>
 
-            <a href="{{ route('shipments.create') }}" class="btn">
-                + Tambah Shipment
+            <a href="{{ route('dashboard') }}" class="btn btn-dashboard">
+                Dashboard
             </a>
         </div>
     </div>
 
-    <div class="section">
+    @if(session('success'))
+        <div class="alert">
+            {{ session('success') }}
+        </div>
+    @endif
 
-        @if(session('success'))
-            <div class="success">
-                {{ session('success') }}
-            </div>
-        @endif
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Shipment Number</th>
+                    <th>Customer</th>
+                    <th>Carrier</th>
+                    <th>Origin</th>
+                    <th>Destination</th>
+                    <th>Cargo Type</th>
+                    <th>Weight (kg)</th>
+                    <th>Expected Departure</th>
+                    <th>Expected Arrival</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
 
-        <div class="table-wrapper">
-
-            <table>
-                <thead>
+            <tbody>
+                @forelse($shipments as $shipment)
                     <tr>
-                        <th>No</th>
-                        <th>Shipment Number</th>
-                        <th>Customer</th>
-                        <th>Carrier</th>
-                        <th>Origin</th>
-                        <th>Destination</th>
-                        <th>Cargo Type</th>
-                        <th>Weight (kg)</th>
-                        <th>Status</th>
-                        <th>Expected Arrival</th>
+                        <td>
+                            {{ $loop->iteration + ($shipments->currentPage() - 1) * $shipments->perPage() }}
+                        </td>
+
+                        <td>{{ $shipment->shipment_number }}</td>
+                        <td>{{ $shipment->customer_name }}</td>
+                        <td>{{ $shipment->carrier_name }}</td>
+                        <td>{{ $shipment->origin_name }}</td>
+                        <td>{{ $shipment->destination_name }}</td>
+                        <td>{{ $shipment->cargo_type }}</td>
+                        <td>{{ $shipment->weight ?? '-' }}</td>
+
+                        <td>
+                            {{ $shipment->expected_departure ? \Carbon\Carbon::parse($shipment->expected_departure)->format('d-m-Y H:i') : '-' }}
+                        </td>
+
+                        <td>
+                            {{ $shipment->expected_arrival ? \Carbon\Carbon::parse($shipment->expected_arrival)->format('d-m-Y H:i') : '-' }}
+                        </td>
+
+                        <td>
+                            @php
+                                $statusClass = match(strtoupper($shipment->current_status)) {
+                                    'CREATED' => 'created',
+                                    'IN_TRANSIT' => 'in-transit',
+                                    'DELIVERED' => 'delivered',
+                                    'CANCELLED' => 'cancelled',
+                                    default => 'created',
+                                };
+                            @endphp
+
+                            <span class="status {{ $statusClass }}">
+                                {{ str_replace('_', ' ', $shipment->current_status) }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="aksi">
+
+                                <a href="{{ route('shipments.edit', $shipment->id) }}"
+                                   class="btn btn-edit">
+                                    Edit
+                                </a>
+
+                                <form action="{{ route('shipments.destroy', $shipment->id) }}"
+                                      method="POST"
+                                      onsubmit="return confirm('Yakin ingin menghapus shipment ini?')">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit" class="btn btn-delete">
+                                        Delete
+                                    </button>
+
+                                </form>
+
+                            </div>
+                        </td>
                     </tr>
-                </thead>
 
-                <tbody>
+                @empty
+                    <tr>
+                        <td colspan="12" style="text-align:center;">
+                            Belum ada data shipment.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 
-                    @forelse($shipments as $shipment)
-
-                        <tr>
-                            <td>
-                                {{ $shipments->firstItem() + $loop->index }}
-                            </td>
-
-                            <td>
-                                <strong>
-                                    {{ $shipment->shipment_number }}
-                                </strong>
-                            </td>
-
-                            <td>
-                                {{ $shipment->customer->name ?? '-' }}
-                            </td>
-
-                            <td>
-                                {{ $shipment->carrier->name ?? '-' }}
-                            </td>
-
-                            <td>
-                                {{ $shipment->origin->name ?? '-' }}
-                            </td>
-
-                            <td>
-                                {{ $shipment->destination->name ?? '-' }}
-                            </td>
-
-                            <td>
-                                {{ $shipment->cargo_type }}
-                            </td>
-
-                            <td>
-                                {{ $shipment->weight ?? '-' }}
-                            </td>
-
-                            <td>
-                                <span class="status {{ strtolower($shipment->current_status) }}">
-                                    {{ str_replace('_', ' ', $shipment->current_status) }}
-                                </span>
-                            </td>
-
-                            <td>
-                                {{ $shipment->expected_arrival
-                                    ? \Carbon\Carbon::parse($shipment->expected_arrival)->format('d-m-Y H:i')
-                                    : '-' }}
-                            </td>
-                        </tr>
-
-                    @empty
-
-                        <tr>
-                            <td colspan="10" class="empty">
-                                Belum ada data shipment.
-                                Silakan tambahkan data pengiriman.
-                            </td>
-                        </tr>
-
-                    @endforelse
-
-                </tbody>
-            </table>
-
-        </div>
-
-        <div class="pagination">
-            {{ $shipments->links() }}
-        </div>
-
+    <div class="pagination">
+        {{ $shipments->links() }}
     </div>
 
 </div>

@@ -86,7 +86,7 @@
 
             @foreach($shipments as $shipment)
                 <option value="{{ $shipment->id }}"
-                    {{ old('shipment_id') == $shipment->id ? 'selected' : '' }}>
+                    {{ old('shipment_id') == $shipment->id ? 'selected' : '' }}>{{ old('shipment_id') == $shipment->id ? 'selected' : '' }}
                     {{ $shipment->shipment_number }}
                 </option>
             @endforeach
@@ -104,7 +104,7 @@
                 'DELAYED'
             ] as $event)
                 <option value="{{ $event }}"
-                    {{ old('event_type', 'IN_TRANSIT') == $event ? 'selected' : '' }}>
+                   {{ old('event_type', 'IN_TRANSIT') == $event ? 'selected' : '' }}
                     {{ $event }}
                 </option>
             @endforeach
