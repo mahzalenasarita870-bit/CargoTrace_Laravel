@@ -10,117 +10,68 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CarrierController;
 use App\Http\Controllers\LocationController;
+use App\Models\AuditLog;
+use App\Models\AppNotification;
 
+Route::get('/', fn () => redirect()->route('login'));
 
-Route::get('/', function () {
-    return redirect()->route('login');
-});
-
-Route::get('/login', [AuthController::class, 'showLogin'])
-    ->name('login');
-
-Route::post('/login', [AuthController::class, 'login'])
-    ->name('login.process');
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 
 Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware('auth')
-    ->name('dashboard');
+    // Akses Bersama: Admin, Operator, dan Customer (Shipment di-filter via Policy/Controller)
+    Route::get('/shipments', [ShipmentController::class, 'index'])->name('shipments.index');
+    Route::get('/shipments/{shipment}', [ShipmentController::class, 'show'])
+        ->whereNumber('shipment')
+        ->name('shipments.show');
+    Route::get('/tracking/{shipment}/history', [TrackingController::class, 'history'])->name('tracking.history');
 
-    Route::post('/logout', [AuthController::class, 'logout'])
-        ->name('logout');
+    // Notifikasi In-App
+    Route::get('/notifications', function () {
+        $notifications = AppNotification::where('user_id', auth()->id())->latest()->paginate(15);
+        return view('notifications.index', compact('notifications'));
+    })->name('notifications.index');
 
-Route::get('/shipments', [ShipmentController::class, 'index'])
-    ->name('shipments.index');
+    Route::patch('/notifications/{notification}/read', function (AppNotification $notification) {
+        abort_if($notification->user_id !== auth()->id(), 403);
+        $notification->update(['read_at' => now()]);
+        return back();
+    })->name('notifications.read');
 
-Route::get('/shipments/create', [ShipmentController::class, 'create'])
-    ->name('shipments.create');
+    // Akses Operasional: Khusus Admin & Logistics Operator
+    Route::middleware('role:admin,operator')->group(function () {
+        Route::get('/shipments/create', [ShipmentController::class, 'create'])->name('shipments.create');
+        Route::post('/shipments', [ShipmentController::class, 'store'])->name('shipments.store');
+        Route::get('/shipments/{shipment}/edit', [ShipmentController::class, 'edit'])->name('shipments.edit');
+        Route::put('/shipments/{shipment}', [ShipmentController::class, 'update'])->name('shipments.update');
 
-Route::post('/shipments', [ShipmentController::class, 'store'])
-    ->name('shipments.store');
+        Route::resource('tracking', TrackingController::class)->only(['index', 'create', 'store']);
+        Route::get('/tracking/search', [TrackingController::class, 'search'])->name('tracking.search');
 
-Route::get('/shipments/{shipment}/edit', [ShipmentController::class, 'edit'])
-    ->name('shipments.edit');
+        Route::resource('exceptions', ExceptionController::class)->only(['index', 'create', 'store']);
+        Route::patch('/exceptions/{exception}/resolve', [ExceptionController::class, 'resolve'])->name('exceptions.resolve');
 
-Route::put('/shipments/{shipment}', [ShipmentController::class, 'update'])
-    ->name('shipments.update');
+        Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
+        Route::get('/reports/export-pdf', [ReportsController::class, 'exportPdf'])->name('reports.exportPdf');
+        Route::get('/reports/export-excel', [ReportsController::class, 'exportExcel'])->name('reports.exportExcel');
+    });
 
-Route::delete('/shipments/{shipment}', [ShipmentController::class, 'destroy'])
-    ->name('shipments.destroy');
-    
-    Route::resource('tracking', TrackingController::class)
-        ->only(['index', 'create', 'store']);
+    // Akses Master Data & Konfigurasi: Khusus Administrator
+    Route::middleware('role:admin')->group(function () {
+        Route::delete('/shipments/{shipment}', [ShipmentController::class, 'destroy'])->name('shipments.destroy');
 
-    Route::get('/tracking/{shipment}/history', [TrackingController::class, 'history'])
-        ->name('tracking.history');
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 
-    Route::get('/tracking/search', [TrackingController::class, 'search'])
-    ->name('tracking.search');
+        Route::resource('carriers', CarrierController::class)->except(['show']);
+        Route::resource('locations', LocationController::class)->except(['show']);
 
-    Route::resource('exceptions', ExceptionController::class)
-    ->only(['index', 'create', 'store']);
-
-    Route::patch('/exceptions/{exception}/resolve', [ExceptionController::class, 'resolve'])
-        ->name('exceptions.resolve');
-
-    Route::get('/users', [UserController::class, 'index'])
-    ->name('users.index');
-
-    Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])
-        ->name('users.updateRole');
-
-    Route::get('/reports', [ReportsController::class, 'index'])
-    ->name('reports.index');
-
-    Route::get('/reports/export-pdf', [ReportsController::class, 'exportPdf'])
-    ->name('reports.exportPdf');
-
-
-    Route::get('/reports/export-excel', [ReportsController::class, 'exportExcel'])
-        ->name('reports.exportExcel');
-
-    // ROUTE CARRIERS
-    Route::get('/carriers', [CarrierController::class, 'index'])
-        ->name('carriers.index');
-
-    Route::get('/carriers/create', [CarrierController::class, 'create'])
-        ->name('carriers.create');
-
-    Route::post('/carriers', [CarrierController::class, 'store'])
-        ->name('carriers.store');
-
-    
-    Route::get('/carriers/{carrier}/edit', [CarrierController::class, 'edit'])
-        ->name('carriers.edit');
-
-    Route::put('/carriers/{carrier}', [CarrierController::class, 'update'])
-        ->name('carriers.update');
-    
-    
-    Route::delete('/carriers/{carrier}', [CarrierController::class, 'destroy'])
-        ->name('carriers.destroy');
-
-
-
-    // ROUTE LOCATIONS
-
-    Route::get('/locations', [LocationController::class, 'index'])
-        ->name('locations.index');
-
-    Route::get('/locations/create', [LocationController::class, 'create'])
-        ->name('locations.create');
-
-    Route::post('/locations', [LocationController::class, 'store'])
-        ->name('locations.store');
-
-    Route::get('/locations/{location}/edit', [LocationController::class, 'edit'])
-        ->name('locations.edit');
-
-    Route::put('/locations/{location}', [LocationController::class, 'update'])
-        ->name('locations.update');
-
-    Route::delete('/locations/{location}', [LocationController::class, 'destroy'])
-        ->name('locations.destroy');
-
+        Route::get('/audit-logs', function () {
+            $logs = AuditLog::with('user')->latest()->paginate(20);
+            return view('audit_logs.index', compact('logs'));
+        })->name('audit-logs.index');
+    });
 });

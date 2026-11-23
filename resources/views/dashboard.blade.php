@@ -5,33 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - CargoTrace</title>
 
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-            .search-container {
-        margin: 20px 0;
-        display: flex;
-        justify-content: flex-end;
-    }
-
-    .search-container input {
-        width: 300px;
-        padding: 10px 15px;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        outline: none;
-        font-size: 14px;
-        background: #ffffff;
-    }
-
-    .search-container input:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-
-    @media (max-width: 600px) {
-        .search-container input {
-            width: 100%;
-        }
-    }
         * {
             margin: 0;
             padding: 0;
@@ -42,564 +19,412 @@
         body {
             background: #f1f5f9;
             color: #1e293b;
+            display: flex;
+            min-height: 100vh;
         }
 
+        /* Sidebar */
         .sidebar {
-            width: 240px;
-            height: 100vh;
-            position: fixed;
+            width: 250px;
             background: #0f172a;
-            color: white;
-            padding: 25px 15px;
-            overflow-y: auto;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            flex-shrink: 0;
         }
 
-        .logo {
-            font-size: 23px;
+        .brand {
+            font-size: 22px;
             font-weight: bold;
-            margin-bottom: 40px;
-            padding-left: 10px;
+            margin-bottom: 6px;
+            color: #38bdf8;
         }
 
-        .menu-title {
+        .role-badge {
+            display: inline-block;
+            background: #1e293b;
             color: #94a3b8;
-            font-size: 12px;
-            margin: 20px 10px;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            width: fit-content;
         }
 
-        .menu a {
+        .nav-link {
             display: block;
-            padding: 13px 15px;
             color: #cbd5e1;
             text-decoration: none;
+            padding: 11px 14px;
             border-radius: 8px;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            font-size: 14px;
+            transition: background 0.2s;
         }
 
-        .menu a.active,
-        .menu a:hover {
-            background: #2563eb;
-            color: white;
-        }
-
-        .main {
-            margin-left: 240px;
-            padding: 30px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            gap: 15px;
-        }
-
-        .header h1 {
-            font-size: 30px;
-            font-weight: 700;
-            color: #0f172a;
-            letter-spacing: -0.5px;
-        }
-
-        .header p {
-            color: #64748b;
-            margin-top: 8px;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .user {
-            background: white;
-            padding: 12px 18px;
-            border-radius: 10px;
+        .nav-link:hover, .nav-link.active {
+            background: #1e293b;
+            color: #ffffff;
             font-weight: bold;
         }
 
-        .logout-button {
-            padding: 12px 18px;
+        .logout-form {
+            margin-top: auto;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 10px;
             background: #dc2626;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 14px;
         }
 
-        .logout-button:hover {
-            background: #b91c1c;
+        /* Main Content */
+        .main {
+            flex: 1;
+            padding: 30px;
+            overflow-x: auto;
         }
 
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .topbar h1 {
+            font-size: 26px;
+            color: #0f172a;
+        }
+
+        .topbar p {
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        /* KPI Cards */
         .cards {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 26px;
         }
 
         .card {
             background: white;
-            padding: 24px;
-            border-radius: 14px;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             border: 1px solid #e2e8f0;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.10);
+        .card .icon {
+            font-size: 24px;
+            margin-bottom: 8px;
         }
 
         .card p {
             color: #64748b;
-            font-size: 14px;
-            margin-bottom: 15px;
+            font-size: 13px;
+            margin-bottom: 6px;
         }
 
         .card h2 {
-            font-size: 30px;
-            color: #1e293b;
+            font-size: 28px;
+            color: #0f172a;
         }
 
-        .card .icon {
-            font-size: 25px;
-            margin-bottom: 12px;
+        .card small {
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
+            color: #64748b;
         }
 
-        .section {
+        .card.danger h2 { color: #dc2626; }
+        .card.warning h2 { color: #d97706; }
+        .card.success h2 { color: #16a34a; }
+        .card.info h2 { color: #2563eb; }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+            margin-bottom: 26px;
+        }
+
+        .panel {
             background: white;
-            padding: 28px;
-            border-radius: 14px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             border: 1px solid #e2e8f0;
         }
 
-        .section h2 {
-            font-size: 20px;
-            margin-bottom: 20px;
+        .panel h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: #0f172a;
         }
 
-        .section-heading {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .section-heading h2 {
-            margin-bottom: 0;
-        }
-
-        .view-all-btn {
-            padding: 10px 16px;
-            background: #2563eb;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .view-all-btn:hover {
-            background: #1d4ed8;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
-        }
-
-        .empty {
-            padding: 35px;
-            text-align: center;
-            color: #64748b;
-            background: #f8fafc;
-            border-radius: 8px;
-        }
-
-        /* Recent Shipments Table */
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
+        /* Table */
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
+            font-size: 14px;
         }
 
-        thead tr {
-            background: #f1f5f9;
+        th, td {
+            padding: 12px 14px;
             text-align: left;
-        }
-
-        thead th {
-            padding: 14px 12px;
-            color: #475569;
-            font-size: 13px;
-            font-weight: bold;
-            border-bottom: 2px solid #e2e8f0;
-            white-space: nowrap;
-        }
-
-        tbody td {
-            padding: 14px 12px;
-            font-size: 13px;
-            color: #334155;
-            white-space: nowrap;
-        }
-
-        tbody tr {
             border-bottom: 1px solid #e2e8f0;
-            transition: background 0.2s ease;
         }
 
-        tbody tr:hover {
+        th {
             background: #f8fafc;
+            color: #475569;
+            font-size: 12px;
+            text-transform: uppercase;
         }
 
-        @media (max-width: 1100px) {
-            .cards {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 14px;
+            font-size: 11px;
+            font-weight: bold;
         }
 
-        @media (max-width: 600px) {
-            .sidebar {
-                width: 70px;
-                padding: 15px 5px;
-            }
+        .badge-blue { background: #dbeafe; color: #1d4ed8; }
+        .badge-red { background: #fee2e2; color: #b91c1c; }
+        .badge-green { background: #dcfce7; color: #15803d; }
 
-            .logo {
-                font-size: 12px;
-                padding: 0;
-                text-align: center;
-            }
+        .btn-detail {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 12px;
+        }
 
-            .menu a {
-                font-size: 11px;
-                padding: 12px 5px;
-                text-align: center;
-            }
-
-            .menu-title {
-                display: none;
-            }
-
-            .main {
-                margin-left: 70px;
-                padding: 15px;
-            }
-
-            .cards {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .header h1 {
-                font-size: 25px;
-            }
-
-            .header-actions {
-                gap: 10px;
-            }
-
-            .section {
-                padding: 18px;
-            }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; }
         }
     </style>
 </head>
-
 <body>
 
-    <div class="sidebar">
-        <div class="logo">🚚 CargoTrace</div>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="brand">🚢 CargoTrace</div>
+        <span class="role-badge">{{ auth()->user()->role ?? 'user' }}</span>
 
-        <div class="menu-title">MENU UTAMA</div>
+        <a href="{{ route('dashboard') }}" class="nav-link active">📊 Dashboard</a>
+        <a href="{{ route('shipments.index') }}" class="nav-link">📦 Shipments</a>
+        <a href="{{ route('notifications.index') }}" class="nav-link">🔔 Notifications</a>
 
-        <div class="menu">
-            <a href="{{ route('dashboard') }}" class="active">📊 Dashboard</a>
-            <a href="{{ route('shipments.index') }}">📦 Shipments</a>
-            <a href="{{ route('tracking.index') }}">📍 Tracking</a>
-            <a href="{{ route('carriers.index') }}">🚛 Carriers</a>
-            <a href="{{ route('locations.index') }}">🌍 Locations</a>
-            <a href="{{ route('exceptions.index') }}">⚠️ Exceptions</a>
-            <a href="{{ route('users.index') }}">👥 Users</a>
-            <a href="{{ route('reports.index') }}">📈 Reports</a>
-        </div>
-    </div>
+        @if(auth()->user()->hasRole(['admin', 'operator']))
+            <a href="{{ route('tracking.index') }}" class="nav-link">📍 Tracking Events</a>
+            <a href="{{ route('exceptions.index') }}" class="nav-link">🚨 Exceptions</a>
+            <a href="{{ route('reports.index') }}" class="nav-link">📑 Reports</a>
+        @endif
 
-    <div class="main">
+        @if(auth()->user()->isAdmin())
+            <a href="{{ route('carriers.index') }}" class="nav-link">🚢 Carriers</a>
+            <a href="{{ route('locations.index') }}" class="nav-link">🗺️ Locations</a>
+            <a href="{{ route('users.index') }}" class="nav-link">👥 Users</a>
+            <a href="{{ route('audit-logs.index') }}" class="nav-link">🛡️ Audit Logs</a>
+        @endif
 
-        <div class="header">
+        <form action="{{ route('logout') }}" method="POST" class="logout-form">
+            @csrf
+            <button type="submit" class="btn-logout">Logout</button>
+        </form>
+    </aside>
+
+    <!-- Main Dashboard Area -->
+    <main class="main">
+        <div class="topbar">
             <div>
-                <h1>Dashboard</h1>
-                <p>Global Shipment Visibility & Tracking Platform</p>
-
-                <p style="margin-top: 8px; color: #2563eb; font-weight: bold;">
-                    📅 {{ now()->format('d F Y') }}
-                </p>
+                <h1>Operational Overview</h1>
+                <p>Selamat datang, <strong>{{ auth()->user()->name }}</strong>. Ringkasan visibilitas pengiriman terkini.</p>
             </div>
-
-            <div class="header-actions">
-                <div class="user">
-                    👤 {{ Auth::user()->name }}
-                </div>
-
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="logout-button">
-                        🚪 Logout
-                    </button>
-                </form>
-            </div>
+            @if(auth()->user()->hasRole(['admin', 'operator']))
+                <a href="{{ route('shipments.create') }}" class="btn-detail" style="padding: 10px 16px; font-size: 14px;">
+                    + Buat Shipment Baru
+                </a>
+            @endif
         </div>
 
-        <!-- Statistik Pengiriman -->
+        <!-- KPI Summary Cards -->
         <div class="cards">
-
             <div class="card">
                 <div class="icon">📦</div>
                 <p>Total Shipments</p>
                 <h2>{{ $totalShipments }}</h2>
+                <small>Seluruh pengiriman terdaftar</small>
             </div>
 
-            <div class="card">
+            <div class="card info">
                 <div class="icon">🚢</div>
                 <p>In Transit</p>
                 <h2>{{ $inTransit }}</h2>
+                <small>Sedang dalam perjalanan</small>
             </div>
 
-            <div class="card">
+            <div class="card success">
                 <div class="icon">✅</div>
                 <p>Delivered</p>
                 <h2>{{ $delivered }}</h2>
+                <small>Tiba di tujuan</small>
             </div>
 
-            <div class="card">
+            <div class="card danger">
                 <div class="icon">⚠️</div>
                 <p>Delayed Shipments</p>
                 <h2>{{ $delayed }}</h2>
+                <small>Delay Rate: <strong>{{ $delayRate }}%</strong></small>
             </div>
 
+            <div class="card warning">
+                <div class="icon">🚨</div>
+                <p>Open Exceptions</p>
+                <h2>{{ $openExceptions }}</h2>
+                <small>Exception Rate: <strong>{{ $exceptionRate }}%</strong></small>
+            </div>
         </div>
 
-        <!-- Recent Shipments -->
-        <div class="section">
-
-            <div class="section-heading">
-                <h2>Recent Shipments</h2>
-                <div class="search-container">
-                <input
-                    type="text"
-                    id="shipmentSearch"
-                    placeholder="Search shipment..."
-                >
+        <!-- Analytics Charts -->
+        <div class="charts-grid">
+            <div class="panel">
+                <h3>📈 Distribusi Shipment berdasarkan Status</h3>
+                <canvas id="statusChart" height="180"></canvas>
             </div>
 
-                <a href="{{ route('shipments.index') }}" class="view-all-btn">
-                    View All Shipments →
-                </a>
+            <div class="panel">
+                <h3>🚢 Distribusi Shipment berdasarkan Carrier</h3>
+                <canvas id="carrierChart" height="180"></canvas>
             </div>
+        </div>
 
-            <div class="table-wrapper">
+        <!-- Recent Shipments Table -->
+        <div class="panel">
+            <h3>🕒 Pengiriman Terbaru</h3>
+            @if($recentShipments->count() > 0)
                 <table>
                     <thead>
                         <tr>
-                            <th>Shipment Number</th>
-                            <th>Cargo Type</th>
+                            <th>Shipment No.</th>
                             <th>Customer</th>
                             <th>Carrier</th>
+                            <th>Rute (Origin → Dest)</th>
                             <th>Status</th>
-                            <th>Date</th>
+                            <th>ETA / Delay</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
-
                     <tbody>
-                        @forelse ($recentShipments as $shipment)
+                        @foreach($recentShipments as $item)
                             <tr>
-                                <td>{{ $shipment->shipment_number }}</td>
-                                <td>{{ $shipment->cargo_type }}</td>
-                                <td>{{ $shipment->customer->name ?? '-' }}</td>
-                                <td>{{ $shipment->carrier->name ?? '-' }}</td>
-
+                                <td><strong>{{ $item->shipment_number }}</strong></td>
+                                <td>{{ $item->customer->name ?? '-' }}</td>
+                                <td>{{ $item->carrier->name ?? '-' }}</td>
+                                <td>{{ $item->origin->city ?? '-' }} → {{ $item->destination->city ?? '-' }}</td>
                                 <td>
-                                    @php
-                                        $status = strtoupper($shipment->current_status);
-
-                                        $statusColors = [
-                                            'CREATED' => '#64748b',
-                                            'IN_TRANSIT' => '#2563eb',
-                                            'DELIVERED' => '#16a34a',
-                                            'DELAYED' => '#dc2626',
-                                        ];
-
-                                        $statusColor = $statusColors[$status] ?? '#64748b';
-                                    @endphp
-
-                                    <span style="
-                                        background: {{ $statusColor }}20;
-                                        color: {{ $statusColor }};
-                                        padding: 6px 12px;
-                                        border-radius: 20px;
-                                        font-size: 12px;
-                                        font-weight: bold;
-                                        display: inline-block;
-                                    ">
-                                        {{ $status }}
+                                    <span class="badge badge-blue">
+                                        {{ str_replace('_', ' ', $item->current_status) }}
                                     </span>
                                 </td>
-
-                                <td>{{ $shipment->created_at?->format('d-m-Y') }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" style="padding: 20px; text-align: center; color: #64748b;">
-                                    Belum ada data pengiriman.
+                                <td>
+                                    @if($item->is_delayed)
+                                        <span class="badge badge-red">Delayed ({{ $item->delay_hours }}h)</span>
+                                    @else
+                                        <span class="badge badge-green">On Schedule</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('shipments.show', $item->id) }}" class="btn-detail">Detail & Peta</a>
                                 </td>
                             </tr>
-                        @endforelse
-                                <tr id="noSearchResults" style="display: none;">
-                        <td colspan="6" style="padding: 20px; text-align: center; color: #64748b;">
-                            Shipment tidak ditemukan.
-                        </td>
-                    </tr>
+                        @endforeach
                     </tbody>
                 </table>
-            </div>
+            @else
+                <p style="color: #64748b; font-size: 14px;">Belum ada data pengiriman.</p>
+            @endif
         </div>
+    </main>
 
-        <!-- Shipment Tracking Overview -->
-        <div class="section">
-            <h2>Shipment Tracking Overview</h2>
-
-            <div style="width: 100%; max-width: 700px; margin: auto;">
-                <canvas id="shipmentChart"></canvas>
-            </div>
-        </div>
-
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <!-- Chart.js Initialization -->
     <script>
-        const ctx = document.getElementById('shipmentChart');
+        document.addEventListener('DOMContentLoaded', function () {
+            const statusLabels = @json(array_keys($byStatus));
+            const statusCounts = @json(array_values($byStatus));
 
-        new Chart(ctx, {
-            type: 'doughnut',
-
-            plugins: [{
-                id: 'centerText',
-                afterDraw(chart) {
-                    const { ctx, chartArea } = chart;
-
-                    if (!chartArea) return;
-
-                    ctx.save();
-                    ctx.font = 'bold 24px Arial';
-                    ctx.fillStyle = '#0f172a';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-
-                    ctx.fillText(
-                        '{{ $totalShipments }}',
-                        (chartArea.left + chartArea.right) / 2,
-                        (chartArea.top + chartArea.bottom) / 2
-                    );
-
-                    ctx.restore();
-                }
-            }],
-
-            data: {
-                labels: ['In Transit', 'Delivered', 'Delayed', 'Created'],
-
-                datasets: [{
-                    data: [
-                        {{ $inTransit }},
-                        {{ $delivered }},
-                        {{ $delayed }},
-                        {{ \App\Models\Shipment::where('current_status', 'CREATED')->count() }}
-                    ],
-
-                    backgroundColor: [
-                        '#2563eb',
-                        '#16a34a',
-                        '#dc2626',
-                        '#94a3b8'
-                    ],
-
-                    borderWidth: 0,
-                    hoverOffset: 8
-                }]
-            },
-
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                cutout: '65%',
-
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom',
-
-                        labels: {
-                            padding: 20,
-                            usePointStyle: true
-                        }
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels.length ? statusLabels : ['No Data'],
+                    datasets: [{
+                        data: statusCounts.length ? statusCounts : [1],
+                        backgroundColor: ['#3b82f6', '#0ea5e9', '#f59e0b', '#10b981', '#6366f1', '#ef4444'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
                     }
-                }
-            }
-        });
-    </script>
-<script>
-    const shipmentSearch = document.getElementById('shipmentSearch');
-    const noSearchResults = document.getElementById('noSearchResults');
-
-    if (shipmentSearch && noSearchResults) {
-        shipmentSearch.addEventListener('input', function () {
-            let searchValue = this.value.toLowerCase().trim();
-
-            let tableRows = document.querySelectorAll(
-                '.table-wrapper tbody tr:not(#noSearchResults)'
-            );
-
-            let found = 0;
-
-            tableRows.forEach(function (row) {
-                let rowText = row.textContent.toLowerCase();
-
-                if (rowText.includes(searchValue)) {
-                    row.style.display = '';
-                    found++;
-                } else {
-                    row.style.display = 'none';
                 }
             });
 
-            if (found === 0 && searchValue !== '') {
-                noSearchResults.style.display = '';
-            } else {
-                noSearchResults.style.display = 'none';
-            }
-        });
-    }
-</script>
+            const carrierLabels = @json(array_keys($byCarrier));
+            const carrierCounts = @json(array_values($byCarrier));
 
+            const carrierCtx = document.getElementById('carrierChart').getContext('2d');
+            new Chart(carrierCtx, {
+                type: 'bar',
+                data: {
+                    labels: carrierLabels.length ? carrierLabels : ['No Data'],
+                    datasets: [{
+                        label: 'Jumlah Shipments',
+                        data: carrierCounts.length ? carrierCounts : [0],
+                        backgroundColor: '#2563eb',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>

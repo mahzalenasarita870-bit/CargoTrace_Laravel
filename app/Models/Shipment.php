@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shipment extends Model
 {
@@ -18,14 +19,24 @@ class Shipment extends Model
         'volume',
         'expected_departure',
         'expected_arrival',
+        'estimated_arrival',
+        'actual_arrival',
         'current_status',
+        'is_delayed',
+        'delay_hours',
+        'delay_severity',
+        'delay_reason',
     ];
 
     protected $casts = [
         'expected_departure' => 'datetime',
         'expected_arrival' => 'datetime',
+        'estimated_arrival' => 'datetime',
+        'actual_arrival' => 'datetime',
         'weight' => 'decimal:2',
         'volume' => 'decimal:2',
+        'is_delayed' => 'boolean',
+        'delay_hours' => 'integer',
     ];
 
     public function customer(): BelongsTo
@@ -48,8 +59,18 @@ class Shipment extends Model
         return $this->belongsTo(Location::class, 'destination_location_id');
     }
 
-     public function trackings()
+    public function items(): HasMany
     {
-        return $this->hasMany(Tracking::class);
+        return $this->hasMany(ShipmentItem::class);
+    }
+
+    public function trackingEvents(): HasMany
+    {
+        return $this->hasMany(TrackingEvent::class)->orderBy('event_time', 'asc');
+    }
+
+    public function exceptions(): HasMany
+    {
+        return $this->hasMany(ShipmentException::class);
     }
 }

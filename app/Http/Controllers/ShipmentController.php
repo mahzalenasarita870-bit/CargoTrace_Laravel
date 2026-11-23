@@ -2,151 +2,139 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Shipment;
-use App\Models\User;
 use App\Models\Carrier;
 use App\Models\Location;
+use App\Models\Shipment;
+use App\Models\User;
+use App\Services\EtaService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
 
 class ShipmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $shipments = Shipment::query()
-            ->join('users', 'shipments.customer_id', '=', 'users.id')
-            ->join('carriers', 'shipments.carrier_id', '=', 'carriers.id')
-            ->join('locations as origin', 'shipments.origin_location_id', '=', 'origin.id')
-            ->join('locations as destination', 'shipments.destination_location_id', '=', 'destination.id')
-            ->select(
-                'shipments.*',
-                'users.name as customer_name',
-                'carriers.name as carrier_name',
-                'origin.name as origin_name',
-                'destination.name as destination_name'
-            )
-            ->latest('shipments.created_at')
-            ->paginate(10);
+        $user = $request->user();
+        $query = Shipment::with(['customer', 'carrier', 'origin', 'destination']);
+
+        if ($user->isCustomer()) {
+            $query->where('customer_id', $user->id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('current_status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $query->where('shipment_number', 'like', '%' . $request->search . '%');
+        }
+
+        $shipments = $query->latest()->paginate(10);
 
         return view('shipments.index', compact('shipments'));
     }
 
-    public function create()
+    public function show(Shipment $shipment)
     {
-        $customers = User::orderBy('name')->get();
-        $carriers = Carrier::orderBy('name')->get();
-        $locations = Location::orderBy('name')->get();
+        Gate::authorize('view', $shipment);
 
-        return view('shipments.create', compact(
-            'customers',
-            'carriers',
-            'locations'
-        ));
+        $shipment->load([
+            'customer',
+            'carrier',
+            'origin',
+            'destination',
+            'trackingEvents' => fn ($q) => $q->with(['location', 'creator'])->orderBy('event_time', 'asc'),
+            'exceptions' => fn ($q) => $q->latest('detected_at'),
+        ]);
+
+        return view('shipments.show', compact('shipment'));
     }
 
-    public function store(Request $request)
+    public function create()
     {
-        $request->validate([
-            'shipment_number' => 'required|string|max:255|unique:shipments,shipment_number',
+        Gate::authorize('create', Shipment::class);
+
+        $customers = User::where('role', 'customer')->get();
+        $carriers = Carrier::all();
+        $locations = Location::all();
+
+        return view('shipments.create', compact('customers', 'carriers', 'locations'));
+    }
+
+    public function store(Request $request, EtaService $etaService)
+    {
+        Gate::authorize('create', Shipment::class);
+
+        $validated = $request->validate([
+            'shipment_number' => 'required|string|unique:shipments,shipment_number',
             'customer_id' => 'required|exists:users,id',
             'carrier_id' => 'required|exists:carriers,id',
             'origin_location_id' => 'required|exists:locations,id',
-            'destination_location_id' => [
-                'required',
-                'exists:locations,id',
-                'different:origin_location_id',
-            ],
+            'destination_location_id' => 'required|exists:locations,id|different:origin_location_id',
             'cargo_type' => 'required|string|max:255',
             'weight' => 'nullable|numeric|min:0',
             'volume' => 'nullable|numeric|min:0',
-            'expected_departure' => 'nullable|date',
-            'expected_arrival' => 'nullable|date|after_or_equal:expected_departure',
-            'current_status' => 'nullable|string|max:255',
+            'expected_departure' => 'required|date',
+            'expected_arrival' => 'required|date|after_or_equal:expected_departure',
+            'estimated_arrival' => 'nullable|date',
         ]);
 
-        $shipment = new Shipment();
+        $validated['estimated_arrival'] = $validated['estimated_arrival'] ?? $validated['expected_arrival'];
+        $validated['current_status'] = 'CREATED';
 
-        $shipment->shipment_number = $request->shipment_number;
-        $shipment->customer_id = $request->customer_id;
-        $shipment->carrier_id = $request->carrier_id;
-        $shipment->origin_location_id = $request->origin_location_id;
-        $shipment->destination_location_id = $request->destination_location_id;
-        $shipment->cargo_type = $request->cargo_type;
-        $shipment->weight = $request->weight;
-        $shipment->volume = $request->volume;
-        $shipment->expected_departure = $request->expected_departure;
-        $shipment->expected_arrival = $request->expected_arrival;
-        $shipment->current_status = $request->current_status ?? 'CREATED';
+        $shipment = Shipment::create($validated);
+        $etaService->evaluateDelay($shipment);
 
-        $shipment->save();
-
-        return redirect()->route('shipments.index')
-            ->with('success', 'Data shipment berhasil ditambahkan.');
+        return redirect()->route('shipments.show', $shipment)->with('success', 'Shipment berhasil dibuat.');
     }
 
     public function edit(Shipment $shipment)
     {
-        $customers = User::orderBy('name')->get();
-        $carriers = Carrier::orderBy('name')->get();
-        $locations = Location::orderBy('name')->get();
+        Gate::authorize('update', $shipment);
 
-        return view('shipments.edit', compact(
-            'shipment',
-            'customers',
-            'carriers',
-            'locations'
-        ));
+        $customers = User::where('role', 'customer')->get();
+        $carriers = Carrier::all();
+        $locations = Location::all();
+
+        return view('shipments.edit', compact('shipment', 'customers', 'carriers', 'locations'));
     }
 
-    public function update(Request $request, Shipment $shipment)
+    public function update(Request $request, Shipment $shipment, EtaService $etaService)
     {
-        $request->validate([
-            'shipment_number' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('shipments', 'shipment_number')->ignore($shipment->id),
-            ],
+        Gate::authorize('update', $shipment);
+
+        $validated = $request->validate([
+            'shipment_number' => 'required|string|max:100|unique:shipments,shipment_number,' . $shipment->id,
             'customer_id' => 'required|exists:users,id',
             'carrier_id' => 'required|exists:carriers,id',
             'origin_location_id' => 'required|exists:locations,id',
-            'destination_location_id' => [
-                'required',
-                'exists:locations,id',
-                'different:origin_location_id',
-            ],
+            'destination_location_id' => 'required|exists:locations,id|different:origin_location_id',
             'cargo_type' => 'required|string|max:255',
             'weight' => 'nullable|numeric|min:0',
             'volume' => 'nullable|numeric|min:0',
-            'expected_departure' => 'nullable|date',
-            'expected_arrival' => 'nullable|date|after_or_equal:expected_departure',
-            'current_status' => 'required|string|max:255',
+            'expected_departure' => 'required|date',
+            'expected_arrival' => 'required|date|after_or_equal:expected_departure',
+            'estimated_arrival' => 'nullable|date',
+            'current_status' => 'required|string',
+            'delay_reason' => 'nullable|string|max:500',
         ]);
 
-        $shipment->shipment_number = $request->shipment_number;
-        $shipment->customer_id = $request->customer_id;
-        $shipment->carrier_id = $request->carrier_id;
-        $shipment->origin_location_id = $request->origin_location_id;
-        $shipment->destination_location_id = $request->destination_location_id;
-        $shipment->cargo_type = $request->cargo_type;
-        $shipment->weight = $request->weight;
-        $shipment->volume = $request->volume;
-        $shipment->expected_departure = $request->expected_departure;
-        $shipment->expected_arrival = $request->expected_arrival;
-        $shipment->current_status = $request->current_status;
+        if ($validated['current_status'] === 'DELIVERED' && !$shipment->actual_arrival) {
+            $validated['actual_arrival'] = now();
+        }
 
-        $shipment->save();
+        $shipment->update($validated);
+        $etaService->evaluateDelay($shipment, null, $validated['delay_reason'] ?? $shipment->delay_reason);
 
-        return redirect()->route('shipments.index')
-            ->with('success', 'Data shipment berhasil diperbarui.');
+        return redirect()->route('shipments.show', $shipment)->with('success', 'Data shipment berhasil diperbarui.');
     }
 
     public function destroy(Shipment $shipment)
     {
+        Gate::authorize('delete', $shipment);
+
         $shipment->delete();
 
-        return redirect()->route('shipments.index')
-            ->with('success', 'Data shipment berhasil dihapus.');
+        return redirect()->route('shipments.index')->with('success', 'Shipment berhasil dihapus.');
     }
 }
