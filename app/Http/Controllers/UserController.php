@@ -9,7 +9,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        if (auth()->user()->role !== 'ADMIN') {
+        if (!auth()->user()->isAdmin()) {
             abort(403, 'Akses hanya untuk Admin.');
         }
 
@@ -20,7 +20,7 @@ class UserController extends Controller
 
     public function updateRole(Request $request, User $user)
     {
-        if (auth()->user()->role !== 'ADMIN') {
+        if (!auth()->user()->isAdmin()) {
             abort(403, 'Akses hanya untuk Admin.');
         }
 
@@ -32,7 +32,7 @@ class UserController extends Controller
         }
 
         $validated = $request->validate([
-            'role' => 'required|in:ADMIN,OPERATOR,CUSTOMER',
+            'role' => 'required|in:admin,operator,customer',
         ]);
 
         $user->update([

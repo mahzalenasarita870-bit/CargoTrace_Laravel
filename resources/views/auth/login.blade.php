@@ -3,160 +3,515 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - CargoTrace</title>
+    <title>Login — CargoTrace Maritime Visibility</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --navy-deep: #132A46;
+            --navy-primary: #1E3A5F;
+            --ocean-blue: #2B6CB0;
+            --cerulean: #4A90E2;
+            --aqua-soft: #7FB3D5;
+            --ice-bg-1: #D4E4F2;
+            --ice-bg-2: #E8F2FA;
+            --ice-bg-3: #F5F9FC;
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --glass-border: rgba(255, 255, 255, 0.96);
+            --text-dark: #102A43;
+            --text-muted: #526D82;
+            --teal-pos: #1D7A68;
+            --teal-bg: #E0F2EE;
+            --amber-warn: #B7791F;
+            --amber-bg: #FEF3C7;
+            --coral-err: #C53030;
+            --coral-bg: #FEE2E2;
+            --indigo-badge: #4338CA;
+            --indigo-bg: #E0E7FF;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
         }
 
         body {
-            min-height: 100vh;
+            background:
+                radial-gradient(circle at 12% 10%, rgba(74, 144, 226, 0.32), transparent 40%),
+                radial-gradient(circle at 88% 18%, rgba(127, 179, 213, 0.45), transparent 44%),
+                radial-gradient(circle at 50% 92%, rgba(30, 58, 95, 0.20), transparent 52%),
+                linear-gradient(155deg, var(--ice-bg-1) 0%, var(--ice-bg-2) 50%, var(--ice-bg-3) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0f172a;
-            color: #fff;
+            padding: 28px 20px;
+            color: var(--text-dark);
         }
 
-        .login-container {
-            width: 900px;
-            max-width: 95%;
+        .ct-login-wrapper {
+            width: 100%;
+            max-width: 960px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 26px;
+            box-shadow: 0 24px 60px rgba(19, 42, 70, 0.16);
             display: flex;
-            background: #fff;
-            border-radius: 18px;
+            flex-direction: row;
             overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0,0,0,.3);
         }
 
-        .left-panel {
+        /* ================= LEFT MARITIME HERO PANEL ================= */
+        .ct-left-panel {
             width: 50%;
-            background: linear-gradient(135deg, #1e40af, #0f172a);
-            padding: 50px 40px;
+            flex: 0 0 50%;
+            background: linear-gradient(145deg, #0F233D 0%, #193B64 52%, #2B6CB0 100%);
+            color: #ffffff;
+            padding: 46px 42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ct-left-panel::before {
+            content: '';
+            position: absolute;
+            top: -70px;
+            right: -70px;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(127, 179, 213, 0.25) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .ct-left-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -80px;
+            left: -50px;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(74, 144, 226, 0.22) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .logo-row {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 13px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #BAE6FD;
+            flex-shrink: 0;
+        }
+
+        .logo-title {
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+            color: #ffffff;
+        }
+
+        .logo-sub {
+            font-size: 11.5px;
+            color: #93C5FD;
+            font-weight: 600;
+        }
+
+        .hero-copy {
+            position: relative;
+            z-index: 2;
+            margin: 32px 0;
+        }
+
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.20);
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #BAE6FD;
+            margin-bottom: 16px;
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #34D399;
+            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25);
+        }
+
+        .ct-left-panel h1 {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.6px;
+            margin-bottom: 14px;
+            color: #ffffff;
+        }
+
+        .ct-left-panel p {
+            font-size: 14px;
+            line-height: 1.65;
+            color: #CBD5E1;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .feat-item {
+            background: rgba(255, 255, 255, 0.09);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 13px;
+            padding: 12px 14px;
+        }
+
+        .feat-title {
+            font-size: 12.5px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .feat-desc {
+            font-size: 11px;
+            color: #BAE6FD;
+            line-height: 1.4;
+        }
+
+        /* ================= RIGHT LOGIN FORM PANEL ================= */
+        .ct-right-panel {
+            width: 50%;
+            flex: 0 0 50%;
+            padding: 44px 44px;
+            background: #ffffff;
+            color: var(--text-dark);
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
-        .left-panel h1 {
-            font-size: 34px;
-            margin-bottom: 20px;
-        }
-
-        .left-panel p {
-            line-height: 1.7;
-            color: #dbeafe;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 40px;
-        }
-
-        .right-panel {
-            width: 50%;
-            padding: 50px 40px;
-            color: #1e293b;
-        }
-
-        .right-panel h2 {
-            font-size: 28px;
-            margin-bottom: 10px;
+        .ct-right-panel h2 {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--navy-deep);
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
         }
 
         .subtitle {
-            color: #64748b;
-            margin-bottom: 30px;
+            font-size: 13.5px;
+            color: var(--text-muted);
+            margin-bottom: 22px;
+        }
+
+        .error {
+            background: var(--coral-bg);
+            color: var(--coral-err);
+            border: 1px solid rgba(197, 48, 48, 0.22);
+            padding: 11px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 18px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--navy-primary);
+            margin-bottom: 7px;
         }
 
-        input {
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 17px;
+            height: 17px;
+            stroke: #7B93A8;
+            stroke-width: 2;
+            fill: none;
+            pointer-events: none;
+        }
+
+        .ct-input {
             width: 100%;
-            padding: 13px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
+            padding: 12px 42px;
+            border-radius: 12px;
+            border: 1.5px solid rgba(30, 58, 95, 0.14);
+            background: #F4F8FC;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-dark);
             outline: none;
+            transition: all 0.2s ease;
         }
 
-        input:focus {
-            border-color: #2563eb;
+        .ct-input:focus {
+            background: #ffffff;
+            border-color: var(--ocean-blue);
+            box-shadow: 0 0 0 4px rgba(43, 108, 176, 0.12);
         }
 
-        button {
-            width: 100%;
-            padding: 14px;
+        .btn-toggle-pw {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
             border: none;
-            border-radius: 8px;
-            background: #2563eb;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
+            color: var(--text-muted);
             cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        button:hover {
-            background: #1d4ed8;
+        .btn-toggle-pw:hover {
+            color: var(--ocean-blue);
         }
 
-        .error {
-            color: #dc2626;
-            margin-bottom: 15px;
+        .btn-login {
+            width: 100%;
+            padding: 13px 18px;
+            margin-top: 6px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--navy-primary) 0%, var(--ocean-blue) 100%);
+            color: #ffffff;
             font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 10px 22px rgba(30, 58, 95, 0.24);
+            transition: all 0.2s ease;
         }
 
-        .demo {
-            margin-top: 25px;
-            padding: 15px;
-            background: #eff6ff;
-            border-radius: 8px;
-            font-size: 13px;
-            line-height: 1.8;
-            color: #1e40af;
+        .btn-login:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 26px rgba(30, 58, 95, 0.30);
         }
 
-        @media (max-width: 650px) {
-            .left-panel {
+        /* ================= DEMO ACCOUNTS BOX ================= */
+        .demo-box {
+            margin-top: 22px;
+            padding: 15px 16px;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #F0F6FC 0%, #E8F1FA 100%);
+            border: 1px solid rgba(43, 108, 176, 0.16);
+        }
+
+        .demo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .demo-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--navy-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .demo-hint {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--ocean-blue);
+        }
+
+        .demo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .demo-btn {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 11px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(30, 58, 95, 0.09);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.16s ease;
+        }
+
+        .demo-btn:hover {
+            background: #ffffff;
+            border-color: var(--ocean-blue);
+            transform: translateX(2px);
+        }
+
+        .demo-role {
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .demo-role.admin    { background: var(--indigo-bg); color: var(--indigo-badge); }
+        .demo-role.operator { background: var(--amber-bg); color: var(--amber-warn); }
+        .demo-role.customer { background: var(--teal-bg); color: var(--teal-pos); }
+
+        .demo-email {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--navy-deep);
+        }
+
+        .demo-pw-note {
+            margin-top: 9px;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 820px) {
+            .ct-login-wrapper {
+                flex-direction: column;
+                max-width: 460px;
+            }
+            .ct-left-panel {
                 display: none;
             }
-
-            .right-panel {
+            .ct-right-panel {
                 width: 100%;
-                padding: 35px 25px;
+                flex: 1 1 auto;
+                padding: 36px 28px;
             }
         }
     </style>
 </head>
-
 <body>
 
-<div class="login-container">
+<div class="ct-login-wrapper">
 
-    <div class="left-panel">
-        <div class="logo">🚚 CargoTrace</div>
+    <!-- Left Maritime Hero Panel -->
+    <div class="ct-left-panel">
+        <div class="logo-row">
+            <div class="logo-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+                    <path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1 .6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                    <path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 7.76"/>
+                    <path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"/>
+                    <path d="M12 10v4"/>
+                    <path d="M12 2v3"/>
+                </svg>
+            </div>
+            <div>
+                <div class="logo-title">CargoTrace</div>
+                <div class="logo-sub">Maritime Supply Visibility</div>
+            </div>
+        </div>
 
-        <h1>Global Shipment Visibility</h1>
+        <div class="hero-copy">
+            <div class="hero-pill">
+                <span class="pulse-dot"></span>
+                Real-Time Logistics Telemetry
+            </div>
 
-        <p>
-            Pantau perjalanan pengiriman barang secara mudah.
-            Kelola shipment, tracking, lokasi, dan status
-            pengiriman dalam satu platform logistik.
-        </p>
+            <h1>Global Shipment Visibility</h1>
+
+            <p>
+                Pantau perjalanan pengiriman barang secara mudah.
+                Kelola shipment, tracking, lokasi, dan status
+                pengiriman dalam satu platform logistik.
+            </p>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feat-item">
+                <div class="feat-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7DD3FC" stroke-width="2.2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    Live GPS &amp; Rute
+                </div>
+                <div class="feat-desc">Visualisasi jalur pelabuhan asal hingga tujuan akhir</div>
+            </div>
+
+            <div class="feat-item">
+                <div class="feat-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7DD3FC" stroke-width="2.2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    Multi-Role Access
+                </div>
+                <div class="feat-desc">Portal terpisah untuk Admin, Operator, &amp; Customer</div>
+            </div>
+        </div>
     </div>
 
-    <div class="right-panel">
+    <!-- Right Login Form Panel -->
+    <div class="ct-right-panel">
 
         <h2>Welcome Back!</h2>
 
@@ -174,40 +529,105 @@
             @csrf
 
             <div class="form-group">
-                <label>Email</label>
-                <input
-                    type="email"
-                    name="email"
-                    placeholder="Masukkan email"
-                    value="{{ old('email') }}"
-                    required
-                >
+                <label for="email">Email</label>
+                <div class="input-wrap">
+                    <svg class="input-icon" viewBox="0 0 24 24">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="ct-input"
+                        placeholder="Masukkan email"
+                        value="{{ old('email') }}"
+                        required
+                        autofocus
+                    >
+                </div>
             </div>
 
             <div class="form-group">
-                <label>Password</label>
-                <input
-                    type="password"
-                    name="password"
-                    placeholder="Masukkan password"
-                    required
-                >
+                <label for="password">Password</label>
+                <div class="input-wrap">
+                    <svg class="input-icon" viewBox="0 0 24 24">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="ct-input"
+                        placeholder="Masukkan password"
+                        required
+                    >
+                    <button type="button" class="btn-toggle-pw" onclick="togglePassword()" title="Tampilkan / Sembunyikan Password">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
-            <button type="submit">Login</button>
+            <button type="submit" class="btn-login">
+                <span>Login</span>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </button>
         </form>
 
-        <div class="demo">
-            <strong>Akun Demo</strong><br>
-            Admin: admin@cargotrace.test<br>
-            Operator: operator@cargotrace.test<br>
-            Customer: customer@cargotrace.test<br>
-            Password: password
+        <div class="demo-box">
+            <div class="demo-header">
+                <span class="demo-title">Akun Demo</span>
+                <span class="demo-hint">Klik akun untuk isi otomatis</span>
+            </div>
+
+            <div class="demo-list">
+                <button type="button" class="demo-btn" onclick="fillDemo('admin@cargotrace.test')">
+                    <span class="demo-email">admin@cargotrace.test</span>
+                    <span class="demo-role admin">Admin</span>
+                </button>
+
+                <button type="button" class="demo-btn" onclick="fillDemo('operator@cargotrace.test')">
+                    <span class="demo-email">operator@cargotrace.test</span>
+                    <span class="demo-role operator">Operator</span>
+                </button>
+
+                <button type="button" class="demo-btn" onclick="fillDemo('customer@cargotrace.test')">
+                    <span class="demo-email">customer@cargotrace.test</span>
+                    <span class="demo-role customer">Customer</span>
+                </button>
+            </div>
+
+            <div class="demo-pw-note">
+                <span>Password:</span>
+                <strong style="color: var(--navy-primary);">password</strong>
+            </div>
         </div>
 
     </div>
 
 </div>
+
+<script>
+    function fillDemo(email) {
+        const emailInput = document.getElementById('email');
+        const passInput  = document.getElementById('password');
+        if (emailInput) emailInput.value = email;
+        if (passInput)  passInput.value  = 'password';
+    }
+
+    function togglePassword() {
+        const passInput = document.getElementById('password');
+        if (!passInput) return;
+        passInput.type = passInput.type === 'password' ? 'text' : 'password';
+    }
+</script>
 
 </body>
 </html>
