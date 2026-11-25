@@ -955,6 +955,8 @@
             $totalUsers    = method_exists($users, 'total') ? $users->total() : $pageCount;
             $staffCount    = $users->filter(fn($u) => in_array(strtolower($u->role ?? ''), ['admin', 'operator']))->count();
             $customerCount = $users->filter(fn($u) => strtolower($u->role ?? '') === 'customer')->count();
+            $activeSearch  = $search ?? request('search', '');
+            $activeRole    = strtolower($role ?? request('role', ''));
         @endphp
 
         <!-- KPI Summary Strip -->
@@ -1006,19 +1008,27 @@
                     </div>
                 </div>
 
-                <div class="toolbar-right">
-                    <select id="roleFilter" class="filter-select">
+                <form method="GET" action="{{ route('users.index') }}" id="userFilterForm" class="toolbar-right">
+                    <select name="role" id="roleFilter" class="filter-select">
                         <option value="">Semua Role</option>
-                        <option value="admin">Admin</option>
-                        <option value="operator">Operator</option>
-                        <option value="customer">Customer</option>
+                        <option value="admin" {{ $activeRole === 'admin' ? 'selected' : '' }}>Admin</option>
+                        <option value="operator" {{ $activeRole === 'operator' ? 'selected' : '' }}>Operator</option>
+                        <option value="customer" {{ $activeRole === 'customer' ? 'selected' : '' }}>Customer</option>
                     </select>
 
                     <div class="search-wrap">
                         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input type="text" id="userSearch" class="search-input" placeholder="Cari nama pengguna atau email...">
+                        <input
+                            type="text"
+                            name="search"
+                            id="userSearch"
+                            value="{{ $activeSearch }}"
+                            class="search-input"
+                            placeholder="Cari nama pengguna atau email..."
+                            autocomplete="off"
+                        >
                     </div>
-                </div>
+                </form>
             </div>
 
             @if(session('success'))
@@ -1062,8 +1072,7 @@
                             @php
                                 $roleKey = strtolower($user->role ?? 'customer');
                             @endphp
-                            <tr data-search="{{ strtolower(($user->name ?? '') . ' ' . ($user->email ?? '') . ' ' . $roleKey) }}"
-                                data-role="{{ $roleKey }}">
+                            <tr>
                                 <td style="font-weight:700; color:var(--text-muted);">
                                     {{ (method_exists($users, 'firstItem') && $users->firstItem() ? $users->firstItem() : 1) + $loop->index }}
                                 </td>
@@ -1099,7 +1108,7 @@
 
                                 <td>
                                     @if($user->id !== auth()->id())
-                                        <form action="{{ route('users.updateRole', $user) }}"
+                                        <form action="{{ route('users.updateRole', array_merge(['user' => $user->id], request()->only(['search', 'role', 'page']))) }}"
                                               method="POST"
                                               class="role-form">
                                             @csrf
@@ -1127,22 +1136,20 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="empty">
-                                    Belum ada pengguna.
+                                    @if($activeSearch !== '' || $activeRole !== '')
+                                        <div style="font-weight: 800; color: var(--navy-deep); margin-bottom: 4px;">
+                                            Tidak ada pengguna yang cocok dengan filter pencarian
+                                        </div>
+                                        <div style="font-size: 12px;">Ubah kata kunci pencarian atau pilih "Semua Role" untuk menampilkan kembali data.</div>
+                                        <button type="button" onclick="resetUserFilter()" class="btn-reset-search">
+                                            ↺ Reset Filter
+                                        </button>
+                                    @else
+                                        Belum ada pengguna.
+                                    @endif
                                 </td>
                             </tr>
                         @endforelse
-
-                        <tr id="userNoMatch" style="display: none;">
-                            <td colspan="6" class="empty">
-                                <div style="font-weight: 800; color: var(--navy-deep); margin-bottom: 4px;">
-                                    Tidak ada pengguna yang cocok dengan filter pencarian
-                                </div>
-                                <div style="font-size: 12px;">Ubah kata kunci pencarian atau pilih "Semua Role" untuk menampilkan kembali data.</div>
-                                <button type="button" onclick="resetUserFilter()" class="btn-reset-search">
-                                    ↺ Reset Filter
-                                </button>
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -1228,49 +1235,49 @@
         </footer>
     </main>
 
-    <!-- Client-Side Search & Role Filter Script -->
+    <!-- Server-Backed Search & Role Filter Script -->
     <script>
-    const searchInput   = document.getElementById('userSearch');
-    const roleFilter    = document.getElementById('roleFilter');
-    const rows          = document.querySelectorAll('#userTable tbody tr[data-search]');
-    const noMatchRow    = document.getElementById('userNoMatch');
-    const footerCounter = document.getElementById('footerCounter');
-    const totalAll      = {{ $totalUsers }};
-
-    function filterUsers() {
-        const query = (searchInput?.value || '').toLowerCase().trim();
-        const role  = (roleFilter?.value || '').toLowerCase().trim();
-        let visibleCount = 0;
-
-        rows.forEach(row => {
-            const text     = row.dataset.search || '';
-            const rowRole  = row.dataset.role || '';
-            const matchTxt = !query || text.includes(query);
-            const matchRol = !role || rowRole === role;
-            const isMatch  = matchTxt && matchRol;
-
-            row.style.display = isMatch ? '' : 'none';
-            if (isMatch) visibleCount++;
-        });
-
-        if (noMatchRow) {
-            noMatchRow.style.display = (rows.length > 0 && visibleCount === 0) ? '' : 'none';
-        }
-
-        if (footerCounter) {
-            footerCounter.textContent = `Menampilkan ${visibleCount} dari ${totalAll} pengguna terdaftar`;
-        }
-    }
+    const filterForm  = document.getElementById('userFilterForm');
+    const searchInput = document.getElementById('userSearch');
+    const roleFilter  = document.getElementById('roleFilter');
+    let searchTimer   = null;
 
     function resetUserFilter() {
-        if (searchInput) searchInput.value = '';
-        if (roleFilter) roleFilter.value = '';
-        filterUsers();
+        window.location.href = "{{ route('users.index') }}";
+    }
+
+    function submitUserFilter() {
+        if (!filterForm) return;
+        if (typeof filterForm.requestSubmit === 'function') {
+            filterForm.requestSubmit();
+        } else {
+            filterForm.submit();
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        if (searchInput) searchInput.addEventListener('input', filterUsers);
-        if (roleFilter)  roleFilter.addEventListener('change', filterUsers);
+        if (roleFilter && filterForm) {
+            roleFilter.addEventListener('change', function () {
+                submitUserFilter();
+            });
+        }
+
+        if (searchInput && filterForm) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(function () {
+                    submitUserFilter();
+                }, 450);
+            });
+
+            searchInput.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    clearTimeout(searchTimer);
+                    submitUserFilter();
+                }
+            });
+        }
     });
     </script>
 
