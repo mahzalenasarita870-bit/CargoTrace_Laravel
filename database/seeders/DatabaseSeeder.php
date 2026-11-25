@@ -18,6 +18,16 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // 0. Akun Pribadi Milik Kamu
+        $personalUser = User::updateOrCreate(
+            ['email' => 'emailkamu@example.com'],
+            [
+                'name' => 'Nama Kamu',
+                'password' => Hash::make('PasswordPilihanKamu123'),
+                'role' => 'admin',
+            ]
+        );
+
         // 1. Akun Demo sesuai Role (Admin, Operator, Customer)
         $admin = User::updateOrCreate(
             ['email' => 'admin@cargotrace.test'],
