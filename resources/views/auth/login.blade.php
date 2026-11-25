@@ -348,9 +348,27 @@
             box-shadow: 0 14px 26px rgba(30, 58, 95, 0.30);
         }
 
+        .auth-switch {
+            margin-top: 14px;
+            text-align: center;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .auth-switch a {
+            color: var(--ocean-blue);
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
         /* ================= DEMO ACCOUNTS BOX ================= */
         .demo-box {
-            margin-top: 22px;
+            margin-top: 18px;
             padding: 15px 16px;
             border-radius: 14px;
             background: linear-gradient(180deg, #F0F6FC 0%, #E8F1FA 100%);
@@ -580,6 +598,10 @@
                 </svg>
             </button>
         </form>
+
+        <div class="auth-switch">
+            Belum punya akun? <a href="{{ route('register') }}">Daftar akun pribadi</a>
+        </div>
 
         <div class="demo-box">
             <div class="demo-header">
