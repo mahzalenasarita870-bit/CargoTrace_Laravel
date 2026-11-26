@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\TrackingEvent;
 use App\Models\Shipment;
 use App\Models\Location;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class TrackingController extends Controller
@@ -47,7 +48,20 @@ class TrackingController extends Controller
 
         $validated['created_by'] = auth()->id();
 
-        TrackingEvent::create($validated);
+        $trackingEvent = TrackingEvent::create($validated);
+        $shipment = Shipment::find($validated['shipment_id']);
+
+        if ($shipment) {
+            $eventType = strtoupper($trackingEvent->event_type ?? 'UPDATE');
+            $type = str_contains($eventType, 'DELAY') ? 'DELAY_ALERT' : 'STATUS_UPDATE';
+
+            NotificationService::notifyShipment(
+                $shipment,
+                $type,
+                "Update Tracking {$shipment->shipment_number} ({$eventType})",
+                $trackingEvent->description ?: "Checkpoint {$eventType} tercatat untuk shipment {$shipment->shipment_number}."
+            );
+        }
 
         return redirect()
             ->route('tracking.index')
@@ -55,42 +69,42 @@ class TrackingController extends Controller
     }
 
     public function history(Shipment $shipment)
-{
-    $trackingEvents = TrackingEvent::with([
-        'shipment',
-        'location',
-        'creator'
-    ])
-    ->where('shipment_id', $shipment->id)
-    ->orderBy('event_time', 'asc')
-    ->get();
+    {
+        $trackingEvents = TrackingEvent::with([
+            'shipment',
+            'location',
+            'creator'
+        ])
+        ->where('shipment_id', $shipment->id)
+        ->orderBy('event_time', 'asc')
+        ->get();
 
-    return view('tracking.history', compact(
-        'shipment',
-        'trackingEvents'
-    ));
-}
-
-    public function search(Request $request)
-{
-    $request->validate([
-        'shipment_number' => 'required|string',
-    ]);
-
-    $shipment = Shipment::where(
-        'shipment_number',
-        $request->shipment_number
-    )->first();
-
-    if (!$shipment) {
-        return redirect()
-            ->route('tracking.index')
-            ->with('error', 'Shipment tidak ditemukan.');
+        return view('tracking.history', compact(
+            'shipment',
+            'trackingEvents'
+        ));
     }
 
-    return redirect()->route(
-        'tracking.history',
-        $shipment->id
-    );
-}
+    public function search(Request $request)
+    {
+        $request->validate([
+            'shipment_number' => 'required|string',
+        ]);
+
+        $shipment = Shipment::where(
+            'shipment_number',
+            $request->shipment_number
+        )->first();
+
+        if (!$shipment) {
+            return redirect()
+                ->route('tracking.index')
+                ->with('error', 'Shipment tidak ditemukan.');
+        }
+
+        return redirect()->route(
+            'tracking.history',
+            $shipment->id
+        );
+    }
 }

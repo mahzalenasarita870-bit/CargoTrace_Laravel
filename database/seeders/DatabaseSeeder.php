@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\AppNotification;
 use App\Models\Carrier;
 use App\Models\Location;
 use App\Models\Shipment;
@@ -18,7 +19,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 0. Akun Pribadi Milik Kamu
+        // 0. Akun Pribadi Milik Kamu (ganti email, nama, dan password sebelum dipakai)
         $personalUser = User::updateOrCreate(
             ['email' => 'emailkamu@example.com'],
             [
@@ -229,5 +230,35 @@ class DatabaseSeeder extends Seeder
                 'created_by' => $operator->id,
             ]
         );
+
+        // 6. Data Uji Notifikasi (AppNotification)
+        $notifUsers = [$personalUser, $admin, $operator, $customer1, $customer2];
+        foreach ($notifUsers as $targetUser) {
+            AppNotification::updateOrCreate(
+                [
+                    'user_id' => $targetUser->id,
+                    'shipment_id' => $shipment1->id,
+                    'type' => 'DELAY_ALERT',
+                ],
+                [
+                    'title' => 'Keterlambatan Pengiriman SHP-2026-0001',
+                    'message' => 'Terjadi kepadatan di pelabuhan transit Singapura (PSA) sehingga ETA bergeser.',
+                    'read_at' => null,
+                ]
+            );
+
+            AppNotification::updateOrCreate(
+                [
+                    'user_id' => $targetUser->id,
+                    'shipment_id' => $shipment2->id,
+                    'type' => 'STATUS_UPDATE',
+                ],
+                [
+                    'title' => 'Pengiriman SHP-2026-0002 Selesai (DELIVERED)',
+                    'message' => 'Kargo telah tiba dan diterima di tujuan Tokyo.',
+                    'read_at' => null,
+                ]
+            );
+        }
     }
 }

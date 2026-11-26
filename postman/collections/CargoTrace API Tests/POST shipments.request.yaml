@@ -1,0 +1,29 @@
+$kind: http-request
+description: ""
+url: "{{base_url}}/api/shipments"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \  \"shipment_number\": \"SHP-TEST-SELASA-001\",\r
+
+    \  \"customer_id\": 150002,\r
+
+    \  \"carrier_id\": 2,\r
+
+    \  \"origin_location_id\": 2,\r
+
+    \  \"destination_location_id\": 3,\r
+
+    \  \"cargo_type\": \"Elektronika\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3000

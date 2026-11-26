@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Shipment;
 use App\Models\ShipmentException;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class ExceptionController extends Controller
@@ -39,7 +40,17 @@ class ExceptionController extends Controller
 
         $validated['status'] = 'OPEN';
 
-        ShipmentException::create($validated);
+        $exception = ShipmentException::create($validated);
+        $shipment = Shipment::find($validated['shipment_id']);
+
+        if ($shipment) {
+            NotificationService::notifyShipment(
+                $shipment,
+                'EXCEPTION_OPENED',
+                "Kendala Baru pada {$shipment->shipment_number} ({$exception->exception_type})",
+                $exception->description ?: "Kendala operasional ({$exception->severity}) tercatat pada pengiriman {$shipment->shipment_number}."
+            );
+        }
 
         return redirect()
             ->route('exceptions.index')
@@ -54,6 +65,17 @@ class ExceptionController extends Controller
                 'resolved_at' => now(),
                 'resolved_by' => auth()->id(),
             ]);
+
+            $shipment = $exception->shipment ?? Shipment::find($exception->shipment_id);
+
+            if ($shipment) {
+                NotificationService::notifyShipment(
+                    $shipment,
+                    'STATUS_UPDATE',
+                    "Kendala Selesai pada {$shipment->shipment_number} ({$exception->exception_type})",
+                    "Exception {$exception->exception_type} pada pengiriman {$shipment->shipment_number} telah ditandai RESOLVED."
+                );
+            }
         }
 
         return redirect()

@@ -1,0 +1,12 @@
+$kind: http-request
+description: ""
+url: "{{base_url}}/api/shipments/90001"
+method: DELETE
+headers:
+  Accept: application/json
+  Content-Type: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 1000

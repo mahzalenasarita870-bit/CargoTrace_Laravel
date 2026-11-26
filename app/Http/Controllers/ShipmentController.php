@@ -7,6 +7,7 @@ use App\Models\Location;
 use App\Models\Shipment;
 use App\Models\User;
 use App\Services\EtaService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -84,6 +85,19 @@ class ShipmentController extends Controller
 
         $shipment = Shipment::create($validated);
         $etaService->evaluateDelay($shipment);
+        $shipment->refresh();
+
+        $isDelayed = (bool) ($shipment->is_delayed ?? false);
+
+        NotificationService::notifyShipment(
+            $shipment,
+            $isDelayed ? 'DELAY_ALERT' : 'STATUS_UPDATE',
+            $isDelayed
+                ? "Peringatan Delay {$shipment->shipment_number}"
+                : "Shipment Baru {$shipment->shipment_number} Dibuat",
+            $shipment->delay_reason
+                ?: "Pengiriman {$shipment->shipment_number} ({$shipment->cargo_type}) berhasil dibuat dengan status {$shipment->current_status}."
+        );
 
         return redirect()->route('shipments.show', $shipment)->with('success', 'Shipment berhasil dibuat.');
     }
@@ -125,6 +139,25 @@ class ShipmentController extends Controller
 
         $shipment->update($validated);
         $etaService->evaluateDelay($shipment, null, $validated['delay_reason'] ?? $shipment->delay_reason);
+        $shipment->refresh();
+
+        $isDelayed = (bool) ($shipment->is_delayed ?? false);
+        $isDelivered = strtoupper($shipment->current_status) === 'DELIVERED';
+
+        $type = $isDelayed ? 'DELAY_ALERT' : 'STATUS_UPDATE';
+        $title = $isDelayed
+            ? "Peringatan Delay {$shipment->shipment_number}"
+            : ($isDelivered
+                ? "Pengiriman {$shipment->shipment_number} Selesai (DELIVERED)"
+                : "Update Status {$shipment->shipment_number}: {$shipment->current_status}");
+
+        $message = $isDelayed
+            ? ($shipment->delay_reason ?: "Terjadi indikasi keterlambatan pada pengiriman {$shipment->shipment_number}.")
+            : ($isDelivered
+                ? "Pengiriman {$shipment->shipment_number} telah berstatus DELIVERED."
+                : "Status pengiriman {$shipment->shipment_number} diperbarui menjadi {$shipment->current_status}.");
+
+        NotificationService::notifyShipment($shipment, $type, $title, $message);
 
         return redirect()->route('shipments.show', $shipment)->with('success', 'Data shipment berhasil diperbarui.');
     }
