@@ -9,7 +9,7 @@ Logistics management and shipment tracking platform built with **Laravel**, **La
 
 Sistem **CargoTrace** menggunakan **9 tabel** relasional dengan kardinalitas **`1:N`** (*one-to-many*) yang berpusat pada entitas `Shipments`.
 
-(![CargoTrace ERD](ERD-cargotrace.png))
+![CargoTrace ERD](./ERD-Cargotrace.png)
 
 
 ### Relasi & Kardinalitas (`1:N`)
