@@ -7,12 +7,11 @@ Logistics management and shipment tracking platform built with **Laravel**, **La
 
 ## Entity Relationship Diagram (ERD)
 
-Sistem **CargoTrace** menggunakan **9 tabel** relasional dengan kardinalitas **`1:N`** (*one-to-many*) yang berpusat pada entitas `Shipments`.
+The **CargoTrace** database uses **9 relational tables** with **`1:N`** (*one-to-many*) cardinalities centered around the `Shipments` entity.
 
 ![CargoTrace ERD](./ERD-Cargotrace.png)
 
-
-### Relasi & Kardinalitas (`1:N`)
+### Relationships & Cardinalities (`1:N`)
 
 * **`Users` (1) ─── (N) `Shipments`** via `Shipments.Customer_id`
 * **`Users` (1) ─── (N) `Tracking_events`** via `Tracking_events.Created_by`
@@ -28,158 +27,158 @@ Sistem **CargoTrace** menggunakan **9 tabel** relasional dengan kardinalitas **`
 * **`Shipments` (1) ─── (N) `Shipment_exceptions`** via `Shipment_exceptions.Shipment_id`
 * **`Shipments` (1) ─── (N) `Notifications`** via `Notifications.Shipment_id`
 
-*(Catatan: `Audit_logs` menggunakan `Auditable_type` dan `Auditable_id` secara polimorfik selain relasi `User_id`.)*
+*(Note: `Audit_logs` also supports polymorphic references via `Auditable_type` and `Auditable_id` in addition to its `User_id` relationship.)*
 
 ## Data Dictionary
 
 ### 1. `Users`
-Menyimpan data pengguna sistem CargoTrace (seperti pelanggan, operator, atau admin).
+Stores system user accounts (such as customers, operators, or administrators).
 
-| Kolom | Tipe Data | Constraint / Default | Keterangan |
+| Column | Data Type | Constraint / Default | Description |
 | :--- | :--- | :--- | :--- |
-| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Identifier unik pengguna |
-| `Name` | `VARCHAR(255)` | `NOT NULL` | Nama lengkap pengguna |
-| `Email` | `VARCHAR(255)` | `UNIQUE`, `NOT NULL` | Alamat email unik untuk login/notifikasi |
-| `Email_verified_at` | `TIMESTAMP` | `NULLABLE` | Waktu verifikasi email |
-| `Password` | `VARCHAR(255)` | `NOT NULL` | Hash kata sandi pengguna |
-| `Remember_token` | `VARCHAR(100)` | `NULLABLE` | Token sesi *remember me* |
-| `Role` | `VARCHAR(50)` | `DEFAULT 'CUSTOMER'`, `NOT NULL` | Peran pengguna di sistem |
-| `Created_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembuatan data |
-| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembaruan terakhir data |
+| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Unique user identifier |
+| `Name` | `VARCHAR(255)` | `NOT NULL` | Full name of the user |
+| `Email` | `VARCHAR(255)` | `UNIQUE`, `NOT NULL` | Unique email address for authentication and notifications |
+| `Email_verified_at` | `TIMESTAMP` | `NULLABLE` | Timestamp when the email address was verified |
+| `Password` | `VARCHAR(255)` | `NOT NULL` | Hashed user password |
+| `Remember_token` | `VARCHAR(100)` | `NULLABLE` | Session remember token |
+| `Role` | `VARCHAR(50)` | `DEFAULT 'CUSTOMER'`, `NOT NULL` | Role assigned to the user in the system |
+| `Created_at` | `TIMESTAMP` | `NULLABLE` | Record creation timestamp |
+| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Record last update timestamp |
 
 ### 2. `Carriers`
-Menyimpan data perusahaan ekspedisi / penyedia jasa pengiriman (*carrier*).
+Stores logistics and freight carrier company records.
 
-| Kolom | Tipe Data | Constraint / Default | Keterangan |
+| Column | Data Type | Constraint / Default | Description |
 | :--- | :--- | :--- | :--- |
-| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Identifier unik *carrier* |
-| `Name` | `VARCHAR(255)` | `NOT NULL` | Nama perusahaan *carrier* |
-| `Code` | `VARCHAR(50)` | `UNIQUE`, `NOT NULL` | Kode unik *carrier* |
-| `Phone` | `VARCHAR(50)` | `NULLABLE` | Nomor telepon kontak *carrier* |
-| `Email` | `VARCHAR(255)` | `NULLABLE` | Alamat email kontak *carrier* |
-| `Created_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembuatan data |
-| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembaruan terakhir data |
+| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Unique carrier identifier |
+| `Name` | `VARCHAR(255)` | `NOT NULL` | Carrier company name |
+| `Code` | `VARCHAR(50)` | `UNIQUE`, `NOT NULL` | Unique carrier code |
+| `Phone` | `VARCHAR(50)` | `NULLABLE` | Carrier contact phone number |
+| `Email` | `VARCHAR(255)` | `NULLABLE` | Carrier contact email address |
+| `Created_at` | `TIMESTAMP` | `NULLABLE` | Record creation timestamp |
+| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Record last update timestamp |
 
 ### 3. `Locations`
-Menyimpan data titik lokasi (gudang, pelabuhan, hub, atau alamat asal/tujuan).
+Stores origin, destination, hub, warehouse, or checkpoint locations.
 
-| Kolom | Tipe Data | Constraint / Default | Keterangan |
+| Column | Data Type | Constraint / Default | Description |
 | :--- | :--- | :--- | :--- |
-| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Identifier unik lokasi |
-| `Name` | `VARCHAR(255)` | `NOT NULL` | Nama lokasi / fasilitas |
-| `City` | `VARCHAR(100)` | `NOT NULL` | Nama kota |
-| `Country` | `VARCHAR(100)` | `NOT NULL` | Nama negara |
-| `Latitude` | `DECIMAL(10,7)` | `NULLABLE` | Koordinat lintang lokasi |
-| `Longitude` | `DECIMAL(10,7)` | `NULLABLE` | Koordinat bujur lokasi |
-| `Created_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembuatan data |
-| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembaruan terakhir data |
+| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Unique location identifier |
+| `Name` | `VARCHAR(255)` | `NOT NULL` | Facility or location name |
+| `City` | `VARCHAR(100)` | `NOT NULL` | City name |
+| `Country` | `VARCHAR(100)` | `NOT NULL` | Country name |
+| `Latitude` | `DECIMAL(10,7)` | `NULLABLE` | Geographic latitude coordinate |
+| `Longitude` | `DECIMAL(10,7)` | `NULLABLE` | Geographic longitude coordinate |
+| `Created_at` | `TIMESTAMP` | `NULLABLE` | Record creation timestamp |
+| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Record last update timestamp |
 
 ### 4. `Shipments`
-Tabel utama transaksi pengiriman kargo yang menghubungkan pelanggan, *carrier*, serta lokasi asal dan tujuan.
+Core shipment transaction table linking customers, carriers, and origin/destination locations.
 
-| Kolom | Tipe Data | Constraint / Default | Keterangan |
+| Column | Data Type | Constraint / Default | Description |
 | :--- | :--- | :--- | :--- |
-| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Identifier unik pengiriman |
-| `Customer_id` | `BIGINT UNSIGNED` | `FK -> Users.Id`, `NOT NULL` | Pemilik/pelanggan pengiriman |
-| `Carrier_id` | `BIGINT UNSIGNED` | `FK -> Carriers.Id`, `NOT NULL` | *Carrier* yang menangani pengiriman |
-| `Origin_location_id` | `BIGINT UNSIGNED` | `FK -> Locations.Id`, `NOT NULL` | Lokasi asal pengiriman |
-| `Destination_location_id` | `BIGINT UNSIGNED` | `FK -> Locations.Id`, `NOT NULL` | Lokasi tujuan pengiriman |
-| `Shipment_number` | `VARCHAR(100)` | `UNIQUE`, `NOT NULL` | Nomor resi / kode unik pengiriman |
-| `Cargo_type` | `VARCHAR(100)` | `NOT NULL` | Jenis kargo/barang |
-| `Weight` | `DECIMAL(10,2)` | `NULLABLE` | Total berat kargo |
-| `Volume` | `DECIMAL(10,3)` | `NULLABLE` | Total volume kargo |
-| `Expected_departure` | `DATETIME` | `NULLABLE` | Jadwal keberangkatan yang diharapkan |
-| `Expected_arrival` | `DATETIME` | `NULLABLE` | Jadwal kedatangan yang diharapkan |
-| `Estimated_arrival` | `DATETIME` | `NULLABLE` | Estimasi waktu tiba terkini (ETA) |
-| `Actual_arrival` | `DATETIME` | `NULLABLE` | Waktu tiba aktual di tujuan |
-| `Current_status` | `VARCHAR(50)` | `DEFAULT 'CREATED'`, `NOT NULL` | Status pengiriman saat ini |
-| `Is_delayed` | `BOOLEAN` | `DEFAULT FALSE`, `NOT NULL` | Penanda apakah pengiriman mengalami keterlambatan |
-| `Delay_hours` | `INT` | `DEFAULT 0`, `NOT NULL` | Durasi keterlambatan dalam jam |
-| `Delay_severity` | `VARCHAR(50)` | `NULLABLE` | Tingkat keparahan keterlambatan |
-| `Delay_reason` | `TEXT` | `NULLABLE` | Alasan atau catatan keterlambatan |
-| `Created_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembuatan data |
-| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembaruan terakhir data |
+| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Unique shipment identifier |
+| `Customer_id` | `BIGINT UNSIGNED` | `FK -> Users.Id`, `NOT NULL` | Customer owning the shipment |
+| `Carrier_id` | `BIGINT UNSIGNED` | `FK -> Carriers.Id`, `NOT NULL` | Carrier handling the shipment |
+| `Origin_location_id` | `BIGINT UNSIGNED` | `FK -> Locations.Id`, `NOT NULL` | Origin location of the shipment |
+| `Destination_location_id` | `BIGINT UNSIGNED` | `FK -> Locations.Id`, `NOT NULL` | Destination location of the shipment |
+| `Shipment_number` | `VARCHAR(100)` | `UNIQUE`, `NOT NULL` | Unique shipment tracking/reference number |
+| `Cargo_type` | `VARCHAR(100)` | `NOT NULL` | Type or category of cargo |
+| `Weight` | `DECIMAL(10,2)` | `NULLABLE` | Total cargo weight |
+| `Volume` | `DECIMAL(10,3)` | `NULLABLE` | Total cargo volume |
+| `Expected_departure` | `DATETIME` | `NULLABLE` | Scheduled departure time |
+| `Expected_arrival` | `DATETIME` | `NULLABLE` | Scheduled arrival time |
+| `Estimated_arrival` | `DATETIME` | `NULLABLE` | Current estimated time of arrival (ETA) |
+| `Actual_arrival` | `DATETIME` | `NULLABLE` | Actual arrival time at destination |
+| `Current_status` | `VARCHAR(50)` | `DEFAULT 'CREATED'`, `NOT NULL` | Current shipment status |
+| `Is_delayed` | `BOOLEAN` | `DEFAULT FALSE`, `NOT NULL` | Indicates whether the shipment is delayed |
+| `Delay_hours` | `INT` | `DEFAULT 0`, `NOT NULL` | Delay duration in hours |
+| `Delay_severity` | `VARCHAR(50)` | `NULLABLE` | Severity level of the delay |
+| `Delay_reason` | `TEXT` | `NULLABLE` | Reason or notes for the delay |
+| `Created_at` | `TIMESTAMP` | `NULLABLE` | Record creation timestamp |
+| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Record last update timestamp |
 
 ### 5. `Shipment_items`
-Menyimpan rincian item/barang yang dimuat dalam suatu pengiriman (`Shipments`).
+Stores line-item details included within a shipment.
 
-| Kolom | Tipe Data | Constraint / Default | Keterangan |
+| Column | Data Type | Constraint / Default | Description |
 | :--- | :--- | :--- | :--- |
-| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Identifier unik item pengiriman |
-| `Shipment_id` | `BIGINT UNSIGNED` | `FK -> Shipments.Id`, `NOT NULL` | Referensi ke pengiriman induk |
-| `Item_name` | `VARCHAR(255)` | `NOT NULL` | Nama barang/item |
-| `Sku` | `VARCHAR(100)` | `NULLABLE` | Kode SKU barang |
-| `Quantity` | `INT` | `DEFAULT 1`, `NOT NULL` | Jumlah unit item |
-| `Weight_kg` | `DECIMAL(10,2)` | `DEFAULT 0`, `NOT NULL` | Berat item dalam kilogram (kg) |
-| `Volume_cbm` | `DECIMAL(10,3)` | `NULLABLE` | Volume item dalam meter kubik (CBM) |
-| `Notes` | `TEXT` | `NULLABLE` | Catatan tambahan item |
-| `Created_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembuatan data |
-| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembaruan terakhir data |
+| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Unique shipment item identifier |
+| `Shipment_id` | `BIGINT UNSIGNED` | `FK -> Shipments.Id`, `NOT NULL` | Referenced parent shipment |
+| `Item_name` | `VARCHAR(255)` | `NOT NULL` | Item or product name |
+| `Sku` | `VARCHAR(100)` | `NULLABLE` | Stock Keeping Unit (SKU) code |
+| `Quantity` | `INT` | `DEFAULT 1`, `NOT NULL` | Number of item units |
+| `Weight_kg` | `DECIMAL(10,2)` | `DEFAULT 0`, `NOT NULL` | Item weight in kilograms (kg) |
+| `Volume_cbm` | `DECIMAL(10,3)` | `NULLABLE` | Item volume in cubic meters (CBM) |
+| `Notes` | `TEXT` | `NULLABLE` | Additional notes for the item |
+| `Created_at` | `TIMESTAMP` | `NULLABLE` | Record creation timestamp |
+| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Record last update timestamp |
 
 ### 6. `Tracking_events`
-Mencatat riwayat pergerakan dan status kejadian (*event*) selama pengiriman berlangsung.
+Records movement checkpoints and status events throughout a shipment's lifecycle.
 
-| Kolom | Tipe Data | Constraint / Default | Keterangan |
+| Column | Data Type | Constraint / Default | Description |
 | :--- | :--- | :--- | :--- |
-| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Identifier unik *tracking event* |
-| `Shipment_id` | `BIGINT UNSIGNED` | `FK -> Shipments.Id`, `NOT NULL` | Referensi pengiriman terkait |
-| `Event_type` | `VARCHAR(100)` | `NOT NULL` | Jenis *event* pelacakan |
-| `Event_time` | `DATETIME` | `NOT NULL` | Waktu terjadinya *event* |
-| `Location_id` | `BIGINT UNSIGNED` | `FK -> Locations.Id`, `NULLABLE` | Lokasi terjadinya *event* |
-| `Latitude` | `DECIMAL(10,7)` | `NULLABLE` | Koordinat lintang saat *event* |
-| `Longitude` | `DECIMAL(10,7)` | `NULLABLE` | Koordinat bujur saat *event* |
-| `Description` | `TEXT` | `NULLABLE` | Uraian/keterangan *event* |
-| `Created_by` | `BIGINT UNSIGNED` | `FK -> Users.Id`, `NULLABLE` | Pengguna yang mencatat *event* |
-| `Created_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembuatan data |
-| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembaruan terakhir data |
+| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Unique tracking event identifier |
+| `Shipment_id` | `BIGINT UNSIGNED` | `FK -> Shipments.Id`, `NOT NULL` | Referenced shipment |
+| `Event_type` | `VARCHAR(100)` | `NOT NULL` | Type of tracking event |
+| `Event_time` | `DATETIME` | `NOT NULL` | Timestamp when the event occurred |
+| `Location_id` | `BIGINT UNSIGNED` | `FK -> Locations.Id`, `NULLABLE` | Location where the event occurred |
+| `Latitude` | `DECIMAL(10,7)` | `NULLABLE` | Latitude coordinate at the event |
+| `Longitude` | `DECIMAL(10,7)` | `NULLABLE` | Longitude coordinate at the event |
+| `Description` | `TEXT` | `NULLABLE` | Detailed description of the event |
+| `Created_by` | `BIGINT UNSIGNED` | `FK -> Users.Id`, `NULLABLE` | User who recorded the event |
+| `Created_at` | `TIMESTAMP` | `NULLABLE` | Record creation timestamp |
+| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Record last update timestamp |
 
 ### 7. `Shipment_exceptions`
-Mencatat kendala atau pengecualian (*exception*) yang terjadi pada pengiriman beserta status penanganannya.
+Tracks operational issues or exceptions encountered during a shipment and their resolution status.
 
-| Kolom | Tipe Data | Constraint / Default | Keterangan |
+| Column | Data Type | Constraint / Default | Description |
 | :--- | :--- | :--- | :--- |
-| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Identifier unik *exception* |
-| `Shipment_id` | `BIGINT UNSIGNED` | `FK -> Shipments.Id`, `NOT NULL` | Referensi pengiriman yang bermasalah |
-| `Exception_type` | `VARCHAR(100)` | `NOT NULL` | Jenis kendala/*exception* |
-| `Severity` | `VARCHAR(50)` | `DEFAULT 'LOW'`, `NOT NULL` | Tingkat keparahan kendala |
-| `Status` | `VARCHAR(50)` | `DEFAULT 'OPEN'`, `NOT NULL` | Status penanganan kendala |
-| `Description` | `TEXT` | `NOT NULL` | Deskripsi detail kendala |
-| `Detected_at` | `DATETIME` | `NOT NULL` | Waktu kendala terdeteksi |
-| `Resolved_at` | `DATETIME` | `NULLABLE` | Waktu kendala selesai ditangani |
-| `Resolved_by` | `BIGINT UNSIGNED` | `FK -> Users.Id`, `NULLABLE` | Pengguna yang menyelesaikan kendala |
-| `Created_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembuatan data |
-| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembaruan terakhir data |
+| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Unique exception identifier |
+| `Shipment_id` | `BIGINT UNSIGNED` | `FK -> Shipments.Id`, `NOT NULL` | Referenced shipment experiencing the issue |
+| `Exception_type` | `VARCHAR(100)` | `NOT NULL` | Category or type of exception |
+| `Severity` | `VARCHAR(50)` | `DEFAULT 'LOW'`, `NOT NULL` | Exception severity level |
+| `Status` | `VARCHAR(50)` | `DEFAULT 'OPEN'`, `NOT NULL` | Current exception resolution status |
+| `Description` | `TEXT` | `NOT NULL` | Detailed description of the exception |
+| `Detected_at` | `DATETIME` | `NOT NULL` | Timestamp when the exception was detected |
+| `Resolved_at` | `DATETIME` | `NULLABLE` | Timestamp when the exception was resolved |
+| `Resolved_by` | `BIGINT UNSIGNED` | `FK -> Users.Id`, `NULLABLE` | User who resolved the exception |
+| `Created_at` | `TIMESTAMP` | `NULLABLE` | Record creation timestamp |
+| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Record last update timestamp |
 
 ### 8. `Notifications`
-Menyimpan notifikasi sistem yang dikirimkan ke pengguna terkait aktivitas atau status pengiriman.
+Stores in-app notifications delivered to users for shipment, tracking, and exception activity.
 
-| Kolom | Tipe Data | Constraint / Default | Keterangan |
+| Column | Data Type | Constraint / Default | Description |
 | :--- | :--- | :--- | :--- |
-| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Identifier unik notifikasi |
-| `User_id` | `BIGINT UNSIGNED` | `FK -> Users.Id`, `NOT NULL` | Penerima notifikasi |
-| `Shipment_id` | `BIGINT UNSIGNED` | `FK -> Shipments.Id`, `NULLABLE` | Pengiriman terkait notifikasi |
-| `Type` | `VARCHAR(100)` | `NOT NULL` | Jenis/kategori notifikasi |
-| `Title` | `VARCHAR(255)` | `NOT NULL` | Judul notifikasi |
-| `Message` | `TEXT` | `NOT NULL` | Isi pesan notifikasi |
-| `Read_at` | `TIMESTAMP` | `NULLABLE` | Waktu notifikasi dibaca pengguna |
-| `Created_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembuatan data |
-| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembaruan terakhir data |
+| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Unique notification identifier |
+| `User_id` | `BIGINT UNSIGNED` | `FK -> Users.Id`, `NOT NULL` | Recipient user |
+| `Shipment_id` | `BIGINT UNSIGNED` | `FK -> Shipments.Id`, `NULLABLE` | Related shipment (if applicable) |
+| `Type` | `VARCHAR(100)` | `NOT NULL` | Notification type or category |
+| `Title` | `VARCHAR(255)` | `NOT NULL` | Notification title |
+| `Message` | `TEXT` | `NOT NULL` | Notification body message |
+| `Read_at` | `TIMESTAMP` | `NULLABLE` | Timestamp when the notification was read |
+| `Created_at` | `TIMESTAMP` | `NULLABLE` | Record creation timestamp |
+| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Record last update timestamp |
 
 ### 9. `Audit_logs`
-Mencatat jejak audit perubahan data (*old values* dan *new values*) serta aktivitas pengguna di sistem.
+Records audit trails of data changes (`Old_values` and `New_values`) and user actions across the platform.
 
-| Kolom | Tipe Data | Constraint / Default | Keterangan |
+| Column | Data Type | Constraint / Default | Description |
 | :--- | :--- | :--- | :--- |
-| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Identifier unik *audit log* |
-| `User_id` | `BIGINT UNSIGNED` | `FK -> Users.Id`, `NULLABLE` | Pengguna yang melakukan aksi |
-| `Action` | `VARCHAR(100)` | `NOT NULL` | Jenis aksi (misalnya `created`, `updated`, `deleted`) |
-| `Auditable_type` | `VARCHAR(255)` | `NOT NULL` | Nama model/entitas target (relasi polimorfik) |
-| `Auditable_id` | `BIGINT UNSIGNED` | `NOT NULL` | ID record target pada entitas terkait |
-| `Old_values` | `JSON` | `NULLABLE` | Nilai data sebelum perubahan |
-| `New_values` | `JSON` | `NULLABLE` | Nilai data sesudah perubahan |
-| `Ip_address` | `VARCHAR(45)` | `NULLABLE` | Alamat IP asal permintaan |
-| `Created_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembuatan log |
-| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Waktu pembaruan log |
+| `Id` | `BIGINT UNSIGNED` | `PK`, `AUTO_INCREMENT`, `NOT NULL` | Unique audit log identifier |
+| `User_id` | `BIGINT UNSIGNED` | `FK -> Users.Id`, `NULLABLE` | User who performed the action |
+| `Action` | `VARCHAR(100)` | `NOT NULL` | Action performed (e.g., `created`, `updated`, `deleted`) |
+| `Auditable_type` | `VARCHAR(255)` | `NOT NULL` | Target model class name (polymorphic) |
+| `Auditable_id` | `BIGINT UNSIGNED` | `NOT NULL` | Target record ID |
+| `Old_values` | `JSON` | `NULLABLE` | Snapshot of values prior to modification |
+| `New_values` | `JSON` | `NULLABLE` | Snapshot of values after modification |
+| `Ip_address` | `VARCHAR(45)` | `NULLABLE` | Client IP address associated with the request |
+| `Created_at` | `TIMESTAMP` | `NULLABLE` | Log creation timestamp |
+| `Updated_at` | `TIMESTAMP` | `NULLABLE` | Log last update timestamp |
 
 ## Tech Stack & Infrastructure
 - **Backend Framework:** Laravel (local development server via `php artisan serve`)
@@ -197,7 +196,7 @@ Mencatat jejak audit perubahan data (*old values* dan *new values*) serta aktivi
 ## Project Structure (Key Directories)
 - `app/` — Controllers (`ShipmentController`, `TrackingController`, `ExceptionController`, etc.), models (`AppNotification`, `Shipment`, `TrackingEvent`, `ShipmentException`, etc.), services (`NotificationService`, `EtaService`), policies, and middleware
 - `database/` — Migrations, seeders (`DatabaseSeeder`), factories, and database configuration
-- `docs/` — Project documentation assets (such as `docs/erd.png`)
+- `docs/` — Project documentation assets
 - `routes/` — API and web route definitions
 - `postman/` — Postman collections (`CargoTrace API Tests`), environments (`CargoTrace Local`), and workspace resources
 
@@ -212,7 +211,7 @@ Mencatat jejak audit perubahan data (*old values* dan *new values*) serta aktivi
    ```bash
    cp .env.example .env
    php artisan key:generate
-   ```
+   
 3. **Run Migrations & Seeder:**
    ```bash
    php artisan migrate --seed
