@@ -366,92 +366,6 @@
             text-decoration: underline;
         }
 
-        /* ================= DEMO ACCOUNTS BOX ================= */
-        .demo-box {
-            margin-top: 18px;
-            padding: 15px 16px;
-            border-radius: 14px;
-            background: linear-gradient(180deg, #F0F6FC 0%, #E8F1FA 100%);
-            border: 1px solid rgba(43, 108, 176, 0.16);
-        }
-
-        .demo-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .demo-title {
-            font-size: 12px;
-            font-weight: 800;
-            color: var(--navy-primary);
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-
-        .demo-hint {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--ocean-blue);
-        }
-
-        .demo-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .demo-btn {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 11px;
-            border-radius: 9px;
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(30, 58, 95, 0.09);
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.16s ease;
-        }
-
-        .demo-btn:hover {
-            background: #ffffff;
-            border-color: var(--ocean-blue);
-            transform: translateX(2px);
-        }
-
-        .demo-role {
-            font-size: 10.5px;
-            font-weight: 800;
-            padding: 2px 8px;
-            border-radius: 999px;
-            text-transform: uppercase;
-            flex-shrink: 0;
-        }
-
-        .demo-role.admin    { background: var(--indigo-bg); color: var(--indigo-badge); }
-        .demo-role.operator { background: var(--amber-bg); color: var(--amber-warn); }
-        .demo-role.customer { background: var(--teal-bg); color: var(--teal-pos); }
-
-        .demo-email {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--navy-deep);
-        }
-
-        .demo-pw-note {
-            margin-top: 9px;
-            font-size: 11.5px;
-            color: var(--text-muted);
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-        }
-
         @media (max-width: 820px) {
             .ct-login-wrapper {
                 flex-direction: column;
@@ -603,47 +517,11 @@
             Belum punya akun? <a href="{{ route('register') }}">Daftar akun pribadi</a>
         </div>
 
-        <div class="demo-box">
-            <div class="demo-header">
-                <span class="demo-title">Akun Demo</span>
-                <span class="demo-hint">Klik akun untuk isi otomatis</span>
-            </div>
-
-            <div class="demo-list">
-                <button type="button" class="demo-btn" onclick="fillDemo('admin@cargotrace.test')">
-                    <span class="demo-email">admin@cargotrace.test</span>
-                    <span class="demo-role admin">Admin</span>
-                </button>
-
-                <button type="button" class="demo-btn" onclick="fillDemo('operator@cargotrace.test')">
-                    <span class="demo-email">operator@cargotrace.test</span>
-                    <span class="demo-role operator">Operator</span>
-                </button>
-
-                <button type="button" class="demo-btn" onclick="fillDemo('customer@cargotrace.test')">
-                    <span class="demo-email">customer@cargotrace.test</span>
-                    <span class="demo-role customer">Customer</span>
-                </button>
-            </div>
-
-            <div class="demo-pw-note">
-                <span>Password:</span>
-                <strong style="color: var(--navy-primary);">password</strong>
-            </div>
-        </div>
-
     </div>
 
 </div>
 
 <script>
-    function fillDemo(email) {
-        const emailInput = document.getElementById('email');
-        const passInput  = document.getElementById('password');
-        if (emailInput) emailInput.value = email;
-        if (passInput)  passInput.value  = 'password';
-    }
-
     function togglePassword() {
         const passInput = document.getElementById('password');
         if (!passInput) return;

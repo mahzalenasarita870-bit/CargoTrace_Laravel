@@ -1,6 +1,6 @@
 $kind: http-request
 description: ""
-url: "{{base_url}}/api/shipments/90001"
+url: "{{base_url}}/api/shipments/60001"
 method: PUT
 headers:
   Accept: application/json

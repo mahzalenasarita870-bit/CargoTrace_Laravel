@@ -19,19 +19,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 0. Akun Pribadi Milik Kamu (ganti email, nama, dan password sebelum dipakai)
-        $personalUser = User::updateOrCreate(
-            ['email' => 'emailkamu@example.com'],
-            [
-                'name' => 'Nama Kamu',
-                'password' => Hash::make('PasswordPilihanKamu123'),
-                'role' => 'admin',
-            ]
-        );
-
-        // 1. Akun Demo sesuai Role (Admin, Operator, Customer)
+        // 1. Akun Utama sesuai Role (Admin, Operator, Customer)
         $admin = User::updateOrCreate(
-            ['email' => 'admin@cargotrace.test'],
+            ['email' => 'admin@gmail.com'],
             [
                 'name' => 'CargoTrace Admin',
                 'password' => Hash::make('password'),
@@ -40,7 +30,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $operator = User::updateOrCreate(
-            ['email' => 'operator@cargotrace.test'],
+            ['email' => 'operator@gmail.com'],
             [
                 'name' => 'Logistics Operator',
                 'password' => Hash::make('password'),
@@ -49,7 +39,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $customer1 = User::updateOrCreate(
-            ['email' => 'customer@cargotrace.test'],
+            ['email' => 'customer1@gmail.com'],
             [
                 'name' => 'PT Nusantara Ekspor',
                 'password' => Hash::make('password'),
@@ -58,7 +48,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $customer2 = User::updateOrCreate(
-            ['email' => 'customer2@cargotrace.test'],
+            ['email' => 'customer2@gmail.com'],
             [
                 'name' => 'Global Trade Corp',
                 'password' => Hash::make('password'),
@@ -75,7 +65,7 @@ class DatabaseSeeder extends Seeder
             $maerskData['mode'] = 'SEA';
         }
         if (Schema::hasColumn('carriers', 'contact_email')) {
-            $maerskData['contact_email'] = 'ops@maersk-demo.test';
+            $maerskData['contact_email'] = 'ops@maersk-line.example.com';
         }
         $maersk = Carrier::updateOrCreate(['name' => 'Maersk Line'], $maerskData);
 
@@ -87,7 +77,7 @@ class DatabaseSeeder extends Seeder
             $cmaData['mode'] = 'SEA';
         }
         if (Schema::hasColumn('carriers', 'contact_email')) {
-            $cmaData['contact_email'] = 'support@cmacgm-demo.test';
+            $cmaData['contact_email'] = 'support@cma-cgm.example.com';
         }
         $cma = Carrier::updateOrCreate(['name' => 'CMA CGM'], $cmaData);
 
@@ -232,7 +222,7 @@ class DatabaseSeeder extends Seeder
         );
 
         // 6. Data Uji Notifikasi (AppNotification)
-        $notifUsers = [$personalUser, $admin, $operator, $customer1, $customer2];
+        $notifUsers = [$admin, $operator, $customer1, $customer2];
         foreach ($notifUsers as $targetUser) {
             AppNotification::updateOrCreate(
                 [
